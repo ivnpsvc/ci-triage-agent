@@ -1,0 +1,25 @@
+{
+  "run_id": "run-10",
+  "model": "baseline",
+  "turns": 0,
+  "cost_usd": 0,
+  "report": {
+    "summary": "Rule-based baseline.",
+    "causes": [
+      {
+        "cause_id": "cause-1",
+        "category": "product_bug",
+        "title": "playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  }
+}

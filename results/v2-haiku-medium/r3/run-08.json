@@ -1,0 +1,80 @@
+{
+  "run_id": "run-08",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0017,
+  "usage": {
+    "input": 10,
+    "output": 1852,
+    "cache_read": 14289,
+    "cache_write": 4871
+  },
+  "report": {
+    "summary": "The only failure, test_current_year_is_accepted, is a test bug: it creates a book with year THIS_YEAR + 1 (next year) and expects 201, but the app correctly rejects next year with 422. Fix the test to use THIS_YEAR, which is what its name describes, and leave the app alone. The seeded year_off_by_one bug is not active in this run.",
+    "causes": [
+      {
+        "cause_id": "test-uses-next-year-for-current-year",
+        "category": "test_bug",
+        "title": "test_current_year_is_accepted submits next year and expects it to be accepted",
+        "explanation": "The test name and intent say the current year should be accepted, but the body passes year=THIS_YEAR + 1. The app's validation only allows years up to the current year (app/main.py:94 sets max_year to this_year unless the year_off_by_one seeded bug is enabled, and 95-96 reject anything above it with 422). So the 422 is the correct, spec-conforming response. The test is also inconsistent with the rest of the suite: test_invalid_book_is_rejected[next-year] (tests/api/test_books_api.py:58) asserts that THIS_YEAR + 1 is rejected, so the two tests contradict each other. The app's behavior is right; the test is wrong about which year it should send.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:50: assert response.status_code == 201 failed with 'assert 422 == 201', response <Response [422 Unprocessable Entity]>",
+          "tests/api/test_books_api.py:47-48: def test_current_year_is_accepted(api): response = api.create_book(title=unique(\"New\"), author=\"Someone\", year=THIS_YEAR + 1)",
+          "app/main.py:92-96: if book.year is not None: this_year = date.today().year; max_year = this_year + 1 if \"year_off_by_one\" in BUGS else this_year; if not 1 <= book.year <= max_year: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "tests/api/test_books_api.py:58: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\"),  (expects rejection of next year)",
+          "app/main.py:9: year_off_by_one  accepts next year as a publication year (seeded bug, only active when BUGS env var includes it; no BUGS setting found in repo config)"
+        ],
+        "suggested_fix": "Change the test to pass year=THIS_YEAR (so it really checks that the current year is accepted), keeping the 201 assertion. Optionally also assert the created year round-trips. Do not change app/main.py. Confirm the CI job does not set BUGS=year_off_by_one, since with that bug enabled the next-year rejection test would fail instead.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_current_year_is_accepted"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_current_year_is_accepted"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "current_year|year"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 1,
+        "end_line": 100
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "BUGS|year_off_by_one"
+      },
+      "is_error": false
+    }
+  ]
+}

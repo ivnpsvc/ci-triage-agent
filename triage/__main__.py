@@ -15,7 +15,7 @@ from pathlib import Path
 import anthropic
 
 from triage.agent import MODEL, TriageError, triage
-from triage.score import render_markdown, score_dataset
+from triage.score import render_markdown, render_repeats, score_dataset, score_repeats
 from triage.tools import Workspace
 
 
@@ -39,33 +39,42 @@ def cmd_one(args) -> None:
 
 
 def cmd_run(args) -> None:
-    args.out.mkdir(parents=True, exist_ok=True)
     run_dirs = sorted(p for p in (args.dataset / "runs").iterdir() if p.is_dir())
     if args.runs:
         run_dirs = [p for p in run_dirs if p.name in args.runs]
+    # With --repeat N, each pass goes to <out>/r1 ... rN so they can be compared.
+    outs = [args.out] if args.repeat == 1 else [args.out / f"r{i}" for i in range(1, args.repeat + 1)]
     spent = 0.0
-    for run_dir in run_dirs:
-        if spent >= args.budget:
-            print(f"Stopping: spent ${spent:.4f}, budget is ${args.budget:.2f}")
-            break
-        try:
-            result = triage(Workspace(run_dir, args.repo), model=args.model, effort=args.effort)
-        except TriageError as e:
-            print(f"{run_dir.name}: FAILED - {e}")
-            continue
-        (args.out / f"{run_dir.name}.json").write_text(json.dumps({
-            "run_id": run_dir.name,
-            "model": args.model,
-            "effort": args.effort,
-            "turns": result.turns,
-            "cost_usd": result.cost_usd,
-            "usage": dict(result.usage),
-            "report": result.report,
-            "trace": result.trace,
-        }, indent=2) + "\n")
-        spent += result.cost_usd or 0
-        print(f"{run_dir.name}: {len(result.report['causes'])} causes, {result.turns} turns, ${result.cost_usd}")
+    for out in outs:
+        out.mkdir(parents=True, exist_ok=True)
+        for run_dir in run_dirs:
+            if spent >= args.budget:
+                print(f"Stopping: spent ${spent:.4f}, budget is ${args.budget:.2f}")
+                print(f"Total: ${spent:.4f}")
+                return
+            spent += triage_run(run_dir, out, args)
     print(f"Total: ${spent:.4f}")
+
+
+def triage_run(run_dir: Path, out: Path, args) -> float:
+    """Triage one run, save its report and return what it cost."""
+    try:
+        result = triage(Workspace(run_dir, args.repo), model=args.model, effort=args.effort)
+    except TriageError as e:
+        print(f"{out.name}/{run_dir.name}: FAILED - {e}")
+        return 0.0
+    (out / f"{run_dir.name}.json").write_text(json.dumps({
+        "run_id": run_dir.name,
+        "model": args.model,
+        "effort": args.effort,
+        "turns": result.turns,
+        "cost_usd": result.cost_usd,
+        "usage": dict(result.usage),
+        "report": result.report,
+        "trace": result.trace,
+    }, indent=2) + "\n")
+    print(f"{out.name}/{run_dir.name}: {len(result.report['causes'])} causes, {result.turns} turns, ${result.cost_usd}")
+    return result.cost_usd or 0
 
 
 def baseline_report(ws: Workspace) -> dict:
@@ -85,6 +94,7 @@ def baseline_report(ws: Workspace) -> dict:
 
 def cmd_baseline(args) -> None:
     args.out.mkdir(parents=True, exist_ok=True)
+    # Baseline reads only the JUnit reports, so the dataset folder stands in for the repo.
     for run_dir in sorted(p for p in (args.dataset / "runs").iterdir() if p.is_dir()):
         report = baseline_report(Workspace(run_dir, args.dataset))
         (args.out / f"{run_dir.name}.json").write_text(json.dumps(
@@ -112,7 +122,13 @@ def cmd_check(args) -> None:
 def cmd_score(args) -> None:
     if not args.predictions.is_dir():
         raise SystemExit(f"No reports in {args.predictions}. Run `python -m triage run --out {args.predictions}` first.")
-    markdown = render_markdown(score_dataset(args.dataset, args.predictions))
+    passes = sorted(p for p in args.predictions.iterdir() if p.is_dir() and p.name.startswith("r"))
+    if passes:  # made with --repeat: score each pass, then how much they agree
+        for p in passes:
+            (p / "score.md").write_text(render_markdown(score_dataset(args.dataset, p)))
+        markdown = render_repeats(score_repeats(args.dataset, passes))
+    else:
+        markdown = render_markdown(score_dataset(args.dataset, args.predictions))
     (args.predictions / "score.md").write_text(markdown)
     print(markdown)
 
@@ -136,6 +152,7 @@ def main() -> None:
     run.add_argument("--out", type=Path, required=True)
     run.add_argument("--runs", nargs="*", help="Only these run ids")
     run.add_argument("--budget", type=float, default=0.50, help="Stop starting new runs once this many USD are spent")
+    run.add_argument("--repeat", type=int, default=1, help="Triage the dataset N times to measure consistency")
     add_model_options(run)
     run.set_defaults(func=cmd_run)
 

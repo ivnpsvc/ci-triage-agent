@@ -29,7 +29,9 @@ def truncate(text: str, limit: int = MAX_OUTPUT_CHARS) -> str:
 
 
 class Workspace:
-    """What the agent can see: one CI run's results and a read-only view of the repo."""
+    """What the agent can see: one CI run's results and a read-only view of the repo
+    as it was checked out for that run (the repo plus the run's overlay.json, which
+    holds files that differed in that checkout)."""
 
     def __init__(self, run_dir: Path, repo_dir: Path, hidden: list[str] | None = None):
         self.run_dir = run_dir
@@ -40,6 +42,8 @@ class Workspace:
         self.totals = suite_totals(junit)
         meta = run_dir / "meta.json"
         self.meta = json.loads(meta.read_text()) if meta.exists() else {}
+        overlay = run_dir / "overlay.json"
+        self.overlay = json.loads(overlay.read_text()) if overlay.exists() else {}
 
     # --- tools -------------------------------------------------------------
 
@@ -73,7 +77,7 @@ class Workspace:
         file = self._resolve(path)
         if not file.is_file():
             raise ToolError(f"{path} is not a file")
-        lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
+        lines = self._text(file).splitlines()
         start = max(start_line, 1)
         end = min(end_line or len(lines), len(lines), start + MAX_READ_LINES - 1)
         numbered = [f"{n:>5}  {lines[n - 1]}" for n in range(start, end + 1)]
@@ -92,7 +96,7 @@ class Workspace:
             rel = str(file.relative_to(self.repo)).replace("\\", "/")
             if path_glob and not fnmatch.fnmatch(rel, path_glob):
                 continue
-            for n, line in enumerate(file.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+            for n, line in enumerate(self._text(file).splitlines(), start=1):
                 if regex.search(line):
                     hits.append(f"{rel}:{n}: {line.strip()[:200]}")
                     if len(hits) >= MAX_SEARCH_HITS:
@@ -125,6 +129,12 @@ class Workspace:
         if not self._visible(resolved):
             raise ToolError(f"{path} is not available")
         return resolved
+
+    def _text(self, file: Path) -> str:
+        rel = str(file.relative_to(self.repo)).replace("\\", "/")
+        if rel in self.overlay:
+            return self.overlay[rel]
+        return file.read_text(encoding="utf-8", errors="replace")
 
     def _visible(self, path: Path) -> bool:
         rel_parts = path.relative_to(self.repo).parts

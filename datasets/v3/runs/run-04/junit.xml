@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="26" time="21.272" timestamp="2026-10-28T19:36:30.507055+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.033" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.016" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.019" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.400" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.553" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.831" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.847" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.295" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.808" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.812" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.839" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.860" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.814" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.780" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.785" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="6.793" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="5.881" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="2.280" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="6.066"><failure message="playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.&#10;Call log:&#10;  - navigating to &quot;http://127.0.0.1:63002/books&quot;, waiting until &quot;load&quot;">logged_in_page = &lt;Page url='about:blank'&gt;
+api = &lt;tests.support.api.BookshelfApi object at 0x000001E9DB8126C0&gt;
+
+    def test_deleted_book_disappears(logged_in_page, api):
+        title = unique("Delete me")
+        api.create_book(title=title, author="Someone").raise_for_status()
+&gt;       books = BooksPage(logged_in_page).open()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\ui\test_books_ui.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:34: in open
+    self.page.goto("/books")
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:18528: in goto
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_page.py:564: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:157: in goto
+    await self._channel.send(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000001E9DB813F80&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001E9DCB4B380&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.
+E           Call log:
+E             - navigating to "http://127.0.0.1:63002/books", waiting until "load"
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="5.094"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;submit&quot;)&#10;    - locator resolved to &lt;button type=&quot;submit&quot; data-testid=&quot;submit&quot;&gt;Register&lt;/button&gt;&#10;  - attempting click action&#10;    - waiting for element to be visible, enabled and stable&#10;    - element is visible, enabled and stable&#10;    - scrolling into view if needed&#10;    - done scrolling&#10;    - performing click action&#10;    - click action done&#10;[+1 more line; full report in element text]">page = &lt;Page url='http://127.0.0.1:63000/register'&gt;
+credentials = {'username': 'user-e6d75222', 'password': 'secret123'}
+
+    def test_new_user_lands_on_empty_bookshelf(page, credentials):
+&gt;       AuthPage(page).open_register().submit(credentials["username"], credentials["password"])
+
+tests\ui\test_login_ui.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:22: in submit
+    self.page.get_by_test_id("submit").click()
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:11021: in click
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_locator.py:174: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:598: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000001ACDD255BE0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001ACDE5831A0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("submit")
+E               - locator resolved to &lt;button type="submit" data-testid="submit"&gt;Register&lt;/button&gt;
+E             - attempting click action
+E               - waiting for element to be visible, enabled and stable
+E               - element is visible, enabled and stable
+E               - scrolling into view if needed
+E               - done scrolling
+E               - performing click action
+E               - click action done
+E               - waiting for scheduled navigations to finish
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.456" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="5.301"><failure message="playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.&#10;Call log:&#10;  - navigating to &quot;http://127.0.0.1:63001/books&quot;, waiting until &quot;load&quot;">logged_in_page = &lt;Page url='about:blank'&gt;
+
+    def test_future_year_shows_error_and_keeps_input(logged_in_page):
+&gt;       books = BooksPage(logged_in_page).open()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\ui\test_books_ui.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:34: in open
+    self.page.goto("/books")
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:18528: in goto
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_page.py:564: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:157: in goto
+    await self._channel.send(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000018F0AB8A090&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000018F0C6754E0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.
+E           Call log:
+E             - navigating to "http://127.0.0.1:63001/books", waiting until "load"
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.439" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="5.276" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.442" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="5.308"><failure message="playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.&#10;Call log:&#10;  - navigating to &quot;http://127.0.0.1:63001/books&quot;, waiting until &quot;load&quot;">logged_in_page = &lt;Page url='about:blank'&gt;
+
+    def test_log_out_ends_the_session(logged_in_page):
+&gt;       books = BooksPage(logged_in_page).open()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\ui\test_login_ui.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:34: in open
+    self.page.goto("/books")
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:18528: in goto
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_page.py:564: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:157: in goto
+    await self._channel.send(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000018F0AB8A090&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000018F0C629C60&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.
+E           Call log:
+E             - navigating to "http://127.0.0.1:63001/books", waiting until "load"
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase></testsuite></testsuites>

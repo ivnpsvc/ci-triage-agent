@@ -1,0 +1,150 @@
+{
+  "run_id": "run-11",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0037,
+  "usage": {
+    "input": 12,
+    "output": 3641,
+    "cache_read": 30106,
+    "cache_write": 12916
+  },
+  "report": {
+    "summary": "Two product bugs account for all four failures, and neither is a test problem. First fix list_books in app/main.py:147-150, which ignores user_id and returns every user's books; this breaks the cross-user isolation test and the new-user empty-bookshelf UI test. Second fix the year check at app/main.py:83, which allows year this_year+1 even though its own error message says the maximum is this year; this breaks both next-year tests.",
+    "causes": [
+      {
+        "cause_id": "list-books-ignores-owner",
+        "category": "product_bug",
+        "title": "Book list returns every user's books",
+        "explanation": "list_books(user_id) never uses user_id. Its query is SELECT * FROM books ORDER BY id with no owner_id filter, so each user's /api/books and /books page lists all books in the database. Other users' books therefore appear in the test user's list, so the isolation test sees the other user's book id and the new-user page shows books instead of the empty state. The per-book endpoints (get_own_book, delete) do filter by owner_id, which is why the 404 assertions in that test would not be the failing part.",
+        "evidence": [
+          "app/main.py:147-150: def list_books(user_id: int) -> list[dict]: rows = conn.execute(\"SELECT * FROM books ORDER BY id\").fetchall()",
+          "app/main.py:166: \"SELECT * FROM books WHERE id = ? AND owner_id = ?\" (get_own_book does filter by owner, so the list is the inconsistent part)",
+          "tests/api/test_books_api.py:41-42: other_ids = [b[\"id\"] for b in other_api.list_books().json()]; assert book[\"id\"] not in other_ids  -> assert 2 not in [1, 2]",
+          "UI failure snapshot for test_new_user_lands_on_empty_bookshelf: the freshly registered user's table contains rows 'New-1fdb9c45 Someone 2026' and 'Dune-04194f69 Frank Herbert 1965', so the 'No books yet' empty-state never renders (tests/ui/test_login_ui.py:14, app/templates/books.html:30)"
+        ],
+        "suggested_fix": "Change the query in list_books to SELECT * FROM books WHERE owner_id = ? ORDER BY id and pass (user_id,). Then rerun both tests; the new-user test should pass as-is.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+        ]
+      },
+      {
+        "cause_id": "year-upper-bound-off-by-one",
+        "category": "product_bug",
+        "title": "Next year is accepted as a book year",
+        "explanation": "validate_book allows years up to this_year + 1, but its error message and the tests both say the maximum is the current year. A book with year date.today().year + 1 is stored with 201 instead of being rejected with 422. The UI therefore never shows the 'Year must be between' error. Both failing tests fail for this single reason.",
+        "evidence": [
+          "app/main.py:83: if not 1 <= book.year <= this_year + 1:",
+          "app/main.py:84: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")  (message says the maximum is this_year, the check allows this_year + 1)",
+          "tests/api/test_books_api.py:58 and 66: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\") ... assert response.status_code == 422 -> got 201 Created",
+          "tests/ui/test_books_ui.py:44: expect(books.error).to_contain_text(\"Year must be between\") -> error element never rendered; the aria snapshot shows a stored 'Future-94641044 Someone 2027' row"
+        ],
+        "suggested_fix": "Change the condition at app/main.py:83 to 1 <= book.year <= this_year so it matches the message and the tests. If next-year books were actually intended, change the message and the test expectations together instead; the current code and message contradict each other. test_current_year_is_accepted still passes under either change.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_users_cannot_see_each_others_books"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "search_code",
+      "input": {
+        "pattern": "Year must be between|user_id|owner|def list_books|def create_book|THIS_YEAR"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_login_ui.py"
+      },
+      "is_error": false
+    }
+  ]
+}

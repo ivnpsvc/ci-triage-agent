@@ -82,6 +82,57 @@ def score_dataset(dataset_dir: Path, predictions_dir: Path) -> dict:
     return {"runs": runs, "totals": totals}
 
 
+def score_repeats(dataset_dir: Path, pass_dirs: list[Path]) -> dict:
+    """Score several passes over the same dataset and measure how much they agree."""
+    labels = json.loads((dataset_dir / "labels.json").read_text())
+    passes = {d.name: score_dataset(dataset_dir, d) for d in pass_dirs}
+
+    agreed = compared = 0
+    for run_id, label in labels.items():
+        reports = [
+            flatten(json.loads((d / f"{run_id}.json").read_text())["report"])
+            for d in pass_dirs
+            if (d / f"{run_id}.json").exists()
+        ]
+        if len(reports) < 2:
+            continue
+        for test in label["failures"]:
+            compared += 1
+            agreed += len({r.get(test, {}).get("category") for r in reports}) == 1
+
+    per_run = {
+        run_id: sum(p["runs"].get(run_id, {}).get("fully_correct", False) for p in passes.values())
+        for run_id in labels
+    }
+    return {"passes": passes, "labels": labels, "agreed": agreed, "compared": compared, "per_run": per_run}
+
+
+def render_repeats(result: dict) -> str:
+    passes = result["passes"]
+    lines = [
+        "| Pass | Runs fully correct | Category accuracy | Grouping correct | Cost |",
+        "|---|---|---|---|---|",
+    ]
+    for name, score in passes.items():
+        t = score["totals"]
+        lines.append(
+            f"| {name} | {t['fully_correct']}/{t['runs']} | {pct(t['category_correct'], t['category_total'])} | "
+            f"{t['grouping_correct']}/{t['runs']} | ${t['cost_usd']:.3f} |"
+        )
+    lines += ["", "| Run | Scenario | Passes fully correct |", "|---|---|---|"]
+    lines += [
+        f"| {run_id} | {result['labels'][run_id]['scenario']} | {count}/{len(passes)} |"
+        for run_id, count in result["per_run"].items()
+    ]
+    lines += [
+        "",
+        f"- Same category in every pass: **{pct(result['agreed'], result['compared'])}** "
+        f"of failed tests ({result['agreed']}/{result['compared']})",
+        f"- Total cost: ${sum(s['totals']['cost_usd'] for s in passes.values()):.3f}",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def pct(part: int, whole: int) -> str:
     return f"{100 * part / whole:.0f}%" if whole else "n/a"
 

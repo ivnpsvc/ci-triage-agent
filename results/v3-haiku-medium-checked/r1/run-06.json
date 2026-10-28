@@ -1,0 +1,91 @@
+{
+  "run_id": "run-06",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0014,
+  "usage": {
+    "input": 12,
+    "output": 1353,
+    "cache_read": 19773,
+    "cache_write": 4102
+  },
+  "report": {
+    "summary": "The one failing test, test_book_can_be_updated, is a test bug: it sends year=2001 to the PUT endpoint and then expects 2002 back, but the app stores and returns the year unchanged. Fix the test's expected value to 2001 (or send 2002 if that was the intent); no application change is needed.",
+    "causes": [
+      {
+        "cause_id": "wrong-expected-year-in-update-test",
+        "category": "test_bug",
+        "title": "Update test expects year 2002 after sending 2001",
+        "explanation": "The test PUTs year=2001 and then asserts the stored record has year=2002. Nothing in the application adds one to the year. The PUT handler writes book.year as sent, and GET returns the stored value, so the response correctly contains 2001. The assertion's expected value is simply inconsistent with its input.",
+        "evidence": [
+          "tests/api/test_books_api.py:23: updated = api.update_book(book[\"id\"], title=\"Final title\", author=\"Someone\", year=2001)",
+          "tests/api/test_books_api.py:27: \"id\": book[\"id\"], \"title\": \"Final title\", \"author\": \"Someone\", \"year\": 2002,",
+          "app/main.py:215-216: \"UPDATE books SET title = ?, author = ?, year = ? WHERE id = ?\", (book.title, book.author, book.year, book_id)",
+          "Failure: assert {'id': 1, 'ti... 'year': 2001} == {'id': 1, 'ti... 'year': 2002} with 'Differing items: {'year': 2001} != {'year': 2002}'",
+          "No '+ 1' or year-adjusting logic was found in app/ (search for year arithmetic returned nothing)."
+        ],
+        "suggested_fix": "Change the expected year on tests/api/test_books_api.py:27 from 2002 to 2001 so it matches the input. Optionally also assert the update response body.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_book_can_be_updated"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_book_can_be_updated"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "update|put|patch"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 190,
+        "end_line": 235
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "year\\s*[+]|\\+\\s*1|def get_own_book|def validate_book",
+        "path_glob": "app/*"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 70,
+        "end_line": 175
+      },
+      "is_error": false
+    }
+  ]
+}

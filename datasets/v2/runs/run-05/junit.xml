@@ -1,0 +1,989 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="26" failures="0" skipped="0" tests="26" time="3.473" timestamp="2026-10-28T18:59:00.889072+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.819"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.819"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.819"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.819"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.001"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.000"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="0.360"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="0.360"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="0.360"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="0.365"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.110"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x0000026DA58738C0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62771'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.001"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.062"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x000001939BD43680&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62770'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.061"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000281DAB6FC50&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62769'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.095"><error message="failed on setup with &quot;RuntimeError: App exited early with code 1&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/IvanPosavec/AppData/Local/Temp/pytest-of-IvanPosavec/pytest-32/p...luggy._tracing.TagTracerSub object at 0x00000266FC39B4D0&gt;, _basetemp=None, _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="session")
+    def base_url(tmp_path_factory):
+        """Starts a fresh app with an empty database for this test session (one per
+        xdist worker). Set BASE_URL to test an already running app instead, or
+        APP_DB_PATH to choose where the app keeps its database."""
+        external = os.environ.get("BASE_URL")
+        if external:
+            yield external.rstrip("/")
+            return
+    
+        port = _free_port()
+        db_path = os.environ.get("APP_DB_PATH") or str(tmp_path_factory.mktemp("db") / "bookshelf.db")
+        env = {**os.environ, "DB_PATH": db_path}
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port), "--log-level", "warning"],
+            cwd=ROOT,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{port}"
+        try:
+&gt;           _wait_until_up(url, proc)
+
+tests\conftest.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+url = 'http://127.0.0.1:62768'
+proc = &lt;Popen: returncode: 1 args: ['C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.ve...&gt;
+timeout = 20
+
+    def _wait_until_up(url: str, proc: subprocess.Popen, timeout: float = 20) -&gt; None:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() &lt; deadline:
+            if proc.poll() is not None:
+&gt;               raise RuntimeError(f"App exited early with code {proc.returncode}")
+E               RuntimeError: App exited early with code 1
+
+tests\conftest.py:35: RuntimeError</error></testcase></testsuite></testsuites>

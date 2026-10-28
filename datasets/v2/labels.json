@@ -1,0 +1,274 @@
+{
+  "run-01": {
+    "scenario": "year_off_by_one",
+    "failures": {
+      "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]": {
+        "category": "product_bug",
+        "cause": "year_off_by_one"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "product_bug",
+        "cause": "year_off_by_one"
+      }
+    }
+  },
+  "run-02": {
+    "scenario": "blank_title",
+    "failures": {
+      "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]": {
+        "category": "product_bug",
+        "cause": "blank_title"
+      }
+    }
+  },
+  "run-03": {
+    "scenario": "leak_books",
+    "failures": {
+      "tests.api.test_books_api::test_users_cannot_see_each_others_books": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      }
+    }
+  },
+  "run-04": {
+    "scenario": "slow_list",
+    "failures": {
+      "tests.ui.test_books_ui::test_added_book_is_listed[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      }
+    }
+  },
+  "run-05": {
+    "scenario": "db_unavailable",
+    "failures": {
+      "tests.api.test_auth_api::test_books_require_a_token": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_duplicate_username_is_rejected": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_invalid_registration_is_rejected[password-too-short]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-long]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-short]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_login_returns_token": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_auth_api::test_register_returns_created_user": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_book_can_be_updated": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_created_book_can_be_fetched": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_current_year_is_accepted": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_deleted_book_is_gone": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.api.test_books_api::test_users_cannot_see_each_others_books": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_books_ui::test_added_book_is_listed[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_login_ui::test_books_page_requires_login[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      },
+      "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]": {
+        "category": "infrastructure",
+        "cause": "db_unavailable"
+      }
+    }
+  },
+  "run-06": {
+    "scenario": "wrong_expected_value",
+    "failures": {
+      "tests.api.test_books_api::test_book_can_be_updated": {
+        "category": "test_bug",
+        "cause": "wrong_expected_value"
+      }
+    }
+  },
+  "run-07": {
+    "scenario": "wrong_locator",
+    "failures": {
+      "tests.ui.test_books_ui::test_added_book_is_listed[chromium]": {
+        "category": "test_bug",
+        "cause": "wrong_locator"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "test_bug",
+        "cause": "wrong_locator"
+      }
+    }
+  },
+  "run-08": {
+    "scenario": "next_year_as_current",
+    "failures": {
+      "tests.api.test_books_api::test_current_year_is_accepted": {
+        "category": "test_bug",
+        "cause": "next_year_as_current"
+      }
+    }
+  },
+  "run-09": {
+    "scenario": "slow_list",
+    "failures": {
+      "tests.ui.test_books_ui::test_added_book_is_listed[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      }
+    }
+  },
+  "run-10": {
+    "scenario": "slow_list",
+    "failures": {
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      },
+      "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]": {
+        "category": "flaky",
+        "cause": "slow_list"
+      }
+    }
+  },
+  "run-11": {
+    "scenario": "year_off_by_one+leak_books",
+    "failures": {
+      "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]": {
+        "category": "product_bug",
+        "cause": "year_off_by_one"
+      },
+      "tests.api.test_books_api::test_users_cannot_see_each_others_books": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "product_bug",
+        "cause": "year_off_by_one"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      }
+    }
+  },
+  "run-12": {
+    "scenario": "leak_books+wrong_locator",
+    "failures": {
+      "tests.api.test_books_api::test_users_cannot_see_each_others_books": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      },
+      "tests.ui.test_books_ui::test_added_book_is_listed[chromium]": {
+        "category": "test_bug",
+        "cause": "wrong_locator"
+      },
+      "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]": {
+        "category": "test_bug",
+        "cause": "wrong_locator"
+      },
+      "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]": {
+        "category": "product_bug",
+        "cause": "leak_books"
+      }
+    }
+  }
+}

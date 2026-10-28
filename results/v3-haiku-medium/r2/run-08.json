@@ -1,0 +1,71 @@
+{
+  "run_id": "run-08",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 3,
+  "cost_usd": 0.0011,
+  "usage": {
+    "input": 8,
+    "output": 1316,
+    "cache_read": 7780,
+    "cache_write": 3281
+  },
+  "report": {
+    "summary": "The single failure, test_current_year_is_accepted, is a test bug: it submits year THIS_YEAR + 1 but expects 201, while the app (app/main.py:83-84) correctly rejects any year after the current one with 422. Fix the test to submit THIS_YEAR so it checks what its name says; the parametrized next-year case already covers the rejection.",
+    "causes": [
+      {
+        "cause_id": "test-uses-next-year-instead-of-current-year",
+        "category": "test_bug",
+        "title": "test_current_year_is_accepted submits next year and expects it to be accepted",
+        "explanation": "The test is named for the current year being accepted, but line 48 passes year=THIS_YEAR + 1. The app's validate_book only allows 1 <= year <= date.today().year, so a future year gets 422. The application is behaving as designed, and the test file itself contradicts the test: the parametrized case at line 58 asserts that THIS_YEAR + 1 must be rejected with 'Year must be between'. The test should use THIS_YEAR.",
+        "evidence": [
+          "tests/api/test_books_api.py:47-50: def test_current_year_is_accepted(api): response = api.create_book(title=unique(\"New\"), author=\"Someone\", year=THIS_YEAR + 1); assert response.status_code == 201",
+          "CI error: tests\\api\\test_books_api.py:50: AssertionError, assert 422 == 201",
+          "app/main.py:81-84: if book.year is not None: this_year = date.today().year; if not 1 <= book.year <= this_year: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "tests/api/test_books_api.py:58: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\"), which expects the next year to be rejected"
+        ],
+        "suggested_fix": "Change line 48 to use year=THIS_YEAR, so the test checks that the current year is accepted. Leave the app validation and the parametrized next-year rejection case unchanged.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_current_year_is_accepted"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_current_year_is_accepted"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "current_year|year"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 66,
+        "end_line": 90
+      },
+      "is_error": false
+    }
+  ]
+}

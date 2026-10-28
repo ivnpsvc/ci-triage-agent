@@ -1,0 +1,145 @@
+{
+  "run_id": "run-05",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0037,
+  "usage": {
+    "input": 12,
+    "output": 4030,
+    "cache_read": 40115,
+    "cache_write": 10493
+  },
+  "report": {
+    "summary": "All 26 tests fail identically during session setup, before any test body runs: the app started by tests/conftest.py exits with code 1 within 20 seconds, so this is an environment or startup failure, not a verdict on the books or auth behavior. Run `python -m uvicorn app.main:app` (with DB_PATH set the way the fixture sets it) in the same environment and read the traceback it prints, since the report does not include the app's own stderr.",
+    "causes": [
+      {
+        "cause_id": "app-fails-to-start-under-test-fixture",
+        "category": "infrastructure",
+        "title": "Uvicorn app subprocess exits with code 1 during session startup",
+        "explanation": "The session-scoped base_url fixture launches the app as a subprocess and polls its /health endpoint. _wait_until_up sees the process exit with return code 1 and raises RuntimeError before any test runs, so every test that depends on base_url (directly or through api, anon_api, user, new_user, other_api) errors at setup. The failure is identical for every test, api and ui alike, which points to the shared startup path rather than any test logic or endpoint. The report does not capture why the child exited. Candidate causes, in the order I would check them: (1) uvicorn or fastapi is missing from the Python interpreter the tests run under, since `python -m uvicorn` exits 1 when the module is absent; (2) the database path is unusable, either APP_DB_PATH or the temp dir from tmp_path_factory is not writable, or the sqlite file is locked by another process, and app/main.py:57-58 opens and writes the database at import time, so any failure there kills the process; (3) an import-time error in app/main.py or its templates. I found nothing in the code that would fail every time: the SCHEMA is valid SQL, the templates directory is declared, and requirements.txt lists the needed packages. The run also appears to be from a local Windows checkout (paths under C:/Users/...), while .github/workflows/tests.yml runs on ubuntu-latest, so the environment may differ from CI.",
+        "evidence": [
+          "tests/conftest.py:35: raise RuntimeError(f\"App exited early with code {proc.returncode}\")  \u2192  runtime error shows proc.returncode == 1 (\"<Popen: returncode: 1 args: ['C:\\\\Users\\\\IvanPosavec\\\\Documents\\\\qa-lab\\\\.ve...']\")",
+          "tests/conftest.py:58-62: subprocess.Popen([sys.executable, \"-m\", \"uvicorn\", \"app.main:app\", \"--port\", str(port), \"--log-level\", \"warning\"], cwd=ROOT, env=env) \u2014 the child's stderr is inherited, so its traceback should appear in the console or CI log where pytest ran, not in the test report",
+          "app/main.py:20: DB_PATH = os.environ.get(\"DB_PATH\", \"bookshelf.db\")",
+          "app/main.py:57-58: with db() as _conn: _conn.executescript(SCHEMA)  \u2014 database is opened and initialized at import time",
+          "tests/conftest.py:56: db_path = os.environ.get(\"APP_DB_PATH\") or str(tmp_path_factory.mktemp(\"db\") / \"bookshelf.db\")",
+          "requirements.txt: fastapi>=0.115, uvicorn>=0.30, jinja2>=3.1, python-multipart>=0.0.9 (all needed for startup)",
+          "list_failures / get_failure: all 26 entries are kind=error with the same message \"RuntimeError: App exited early with code 1\"; none is a failure kind (assertion)"
+        ],
+        "suggested_fix": "First, get the child process's traceback: run the same command the fixture uses in the same interpreter, with DB_PATH pointing to a writable temp file, e.g. `set DB_PATH=%TEMP%\\bk.db && python -m uvicorn app.main:app --port 8765 --log-level warning` from the repo root, and read the error it prints. Then fix what it reports: install the requirements into the interpreter the tests use (`pip install -r requirements-dev.txt`), clear or correct APP_DB_PATH if it is set, or fix the import error. Also consider making _wait_until_up include the child's exit output in its error message, or have the fixture start the app with stderr captured, so the next failure of this kind is self-explanatory. Re-run the full suite after the fix; if the 26 tests then pass, no test or product change is needed.",
+        "confidence": "medium",
+        "tests": [
+          "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected",
+          "tests.api.test_auth_api::test_register_returns_created_user",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-short]",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[password-too-short]",
+          "tests.api.test_auth_api::test_books_require_a_token",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-long]",
+          "tests.api.test_auth_api::test_duplicate_username_is_rejected",
+          "tests.api.test_auth_api::test_login_returns_token",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_deleted_book_is_gone",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.api.test_books_api::test_current_year_is_accepted",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]",
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]",
+          "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]",
+          "tests.ui.test_login_ui::test_books_page_requires_login[chromium]",
+          "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]",
+          "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_auth_api::test_login_returns_token"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "requirements.txt"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "APP_DB_PATH|DB_PATH|bookshelf.db"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "requirements-dev.txt"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "pyproject.toml"
+      },
+      "is_error": false
+    }
+  ]
+}

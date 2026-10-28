@@ -42,6 +42,15 @@ def test_search_skips_hidden_files(run_dir, repo):
     assert "README.md" not in ws.list_files()
 
 
+def test_overlay_files_replace_the_repo_version(run_dir, repo):
+    (run_dir / "overlay.json").write_text('{"app/main.py": "def validate(year):\\n    return year <= 2027\\n"}')
+    ws = Workspace(run_dir, repo)
+
+    assert "2027" in ws.read_file("app/main.py")
+    assert ws.search_code("2026") == "No matches."
+    assert ws.search_code("2027") == "app/main.py:2: return year <= 2027"
+
+
 def test_bad_arguments_are_a_tool_error(run_dir, repo):
     with pytest.raises(ToolError):
         Workspace(run_dir, repo).call("read_file", {"file": "app/main.py"})

@@ -1,0 +1,59 @@
+{
+  "run_id": "run-11",
+  "model": "baseline",
+  "turns": 0,
+  "cost_usd": 0,
+  "report": {
+    "summary": "Rule-based baseline.",
+    "causes": [
+      {
+        "cause_id": "cause-1",
+        "category": "product_bug",
+        "title": "assert 201 == 422",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]"
+        ]
+      },
+      {
+        "cause_id": "cause-2",
+        "category": "product_bug",
+        "title": "assert 2 not in [1, 2]",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books"
+        ]
+      },
+      {
+        "cause_id": "cause-3",
+        "category": "product_bug",
+        "title": "AssertionError: Locator expected to be visible",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+        ]
+      },
+      {
+        "cause_id": "cause-4",
+        "category": "product_bug",
+        "title": "AssertionError: Locator expected to contain text 'Year must be between'",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  }
+}

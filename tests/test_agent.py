@@ -101,6 +101,28 @@ def test_report_can_only_name_this_runs_failed_tests(run_dir, repo):
     assert allowed == ["tests.api.test_books::test_year", "tests.ui.test_login::test_login[chromium]"]
 
 
+def test_incomplete_report_is_sent_back_once_then_fixed(run_dir, repo):
+    empty = {"summary": "Right diagnosis, but no causes listed.", "causes": []}
+    client = FakeClient([response(text(json.dumps(empty))), response(text(json.dumps(REPORT)))])
+
+    result = triage(Workspace(run_dir, repo), client=client)
+
+    assert result.report == REPORT
+    correction = client.requests[1]["messages"][-1]["content"]
+    assert "not in any cause: tests.api.test_books::test_year" in correction
+    assert result.trace[-1]["tool"] == "report_check"
+
+
+def test_repeated_test_is_flagged_and_corrections_are_limited(run_dir, repo):
+    doubled = {**REPORT, "causes": REPORT["causes"] + [REPORT["causes"][0]]}
+    client = FakeClient([response(text(json.dumps(doubled)))] * 3)
+
+    result = triage(Workspace(run_dir, repo), client=client, max_corrections=2)
+
+    assert result.turns == 3  # first answer + two corrections, then accepted as is
+    assert "more than one cause: tests.api.test_books::test_year" in client.requests[1]["messages"][-1]["content"]
+
+
 def test_run_without_failures_makes_no_api_call(tmp_path, repo):
     run = tmp_path / "clean"
     run.mkdir()

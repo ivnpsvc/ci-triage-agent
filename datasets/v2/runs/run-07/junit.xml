@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="26" time="15.822" timestamp="2026-10-28T18:59:12.664825+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.000" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.003" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.051" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.351" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.405" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.355" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.825" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.839" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.759" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.717" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.777" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.784" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.747" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.740" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.726" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="1.400" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="5.908"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;add-books&quot;)">logged_in_page = &lt;Page url='http://127.0.0.1:53840/books'&gt;
+
+    def test_added_book_is_listed(logged_in_page):
+        books = BooksPage(logged_in_page).open()
+        title = unique("Dune")
+    
+&gt;       books.add(title, "Frank Herbert", "1965")
+
+tests\ui\test_books_ui.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:44: in add
+    self.page.get_by_test_id("add-books").click()
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:11021: in click
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_locator.py:174: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:598: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000245A6A2BB60&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000245A7D6B240&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("add-books")
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.708" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="1.169" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="1.227" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.256" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.903" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.648" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.553" /><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.153" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="5.366"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;add-books&quot;)">logged_in_page = &lt;Page url='http://127.0.0.1:53840/books'&gt;
+
+    def test_future_year_shows_error_and_keeps_input(logged_in_page):
+        books = BooksPage(logged_in_page).open()
+        title = unique("Future")
+    
+&gt;       books.add(title, "Someone", str(date.today().year + 1))
+
+tests\ui\test_books_ui.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:44: in add
+    self.page.get_by_test_id("add-books").click()
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:11021: in click
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_locator.py:174: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:598: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000245A6A2BB60&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000245A7E61800&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("add-books")
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,119 @@
+{
+  "run_id": "run-10",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0033,
+  "usage": {
+    "input": 10,
+    "output": 2265,
+    "cache_read": 23718,
+    "cache_write": 15220
+  },
+  "report": {
+    "summary": "All three UI failures are the same Page.goto timeout on /books at the 5 s limit. The cause is an artificial random delay of 0\u20138 s in app/main.py list_books(), which runs on every /books render, so roughly 3 in 8 page loads exceed the timeout. Fix the app code first (remove or bound the sleep), and treat these tests as flaky until then.",
+    "causes": [
+      {
+        "cause_id": "random-sleep-in-list-books",
+        "category": "flaky",
+        "title": "/books page render sleeps a random 0\u20138 s, exceeding the 5 s goto timeout",
+        "explanation": "list_books() calls time.sleep(random.uniform(0, 8)) before querying the database. render_books() calls list_books() for every /books page render, so the HTML response is delayed by a random amount. The shared fixture sets the default timeout to 5000 ms (tests/ui/conftest.py:5-7), and BooksPage.open() calls page.goto('/books') with the default 'load' wait (tests/support/pages.py:33-35). When the random delay exceeds about 5 s, goto times out before the page loads. Outcomes depend on chance, so the same commit can pass on a rerun. The app is not wrong about the data; the delay is simply nondeterministic. The login UI tests did not fail because they navigate to /login, which does not call list_books. The assertions in the three failing tests were never reached.",
+        "evidence": [
+          "app/main.py:150: time.sleep(random.uniform(0, 8))",
+          "app/main.py:256: \"books\": list_books(user[\"id\"]),  (called from render_books on every /books render)",
+          "tests/support/pages.py:34: self.page.goto(\"/books\")",
+          "tests/ui/conftest.py:5-7: fail_fast sets page.set_default_timeout(5000) with the comment 'Nothing in this app should take longer than 5 s'",
+          "Failure text (all three tests): \"Page.goto: Timeout 5000ms exceeded. Call log: navigating to \\\"http://127.0.0.1:49185/books\\\", waiting until \\\"load\\\"\"",
+          "Only one time.sleep/random call exists in app/ or tests/ besides the 0.2 s poll in tests/conftest.py:41, so this is the sole delay source."
+        ],
+        "suggested_fix": "Remove the random sleep from app/main.py:150 (it appears to be a debugging or fault-injection leftover, and the app is meant to be fast per the conftest comment). If the slowness is intended as a test scenario, make it deterministic and test it explicitly, and do not let it leak into the default /books render. As a secondary hardening step, have BooksPage.open() wait for a stable element (e.g. the books list or current-user) rather than relying solely on the 'load' event and the 5 s default. Do not raise the timeout as the only fix, since the delay can still exceed any fixed limit.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "sleep|random"
+      },
+      "is_error": false
+    }
+  ]
+}

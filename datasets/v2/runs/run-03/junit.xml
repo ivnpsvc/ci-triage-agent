@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="26" time="11.729" timestamp="2026-10-28T18:58:30.898318+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.047" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.031" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.040" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.382" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.468" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.342" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.835" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.826" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.843" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.715" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.833" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.839" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.807" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.852" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.857" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="1.731"><failure message="assert 2 not in [1, 2]">api = &lt;tests.support.api.BookshelfApi object at 0x0000022C4C787710&gt;
+other_api = &lt;tests.support.api.BookshelfApi object at 0x0000022C4CC83EC0&gt;
+
+    def test_users_cannot_see_each_others_books(api, other_api):
+        book = api.create_book(title=unique("Private"), author="Me").json()
+    
+        other_ids = [b["id"] for b in other_api.list_books().json()]
+&gt;       assert book["id"] not in other_ids
+E       assert 2 not in [1, 2]
+
+tests\api\test_books_api.py:42: AssertionError</failure></testcase><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="1.015" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="0.605" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="1.358" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="1.442" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.798" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="5.269"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; get_by_test_id(&quot;empty-state&quot;) with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;empty-state&quot;)&#10;&#10;Aria snapshot:&#10;- banner:&#10;  - strong: Bookshelf&#10;  - text: signed in as user-8dd55391&#10;  - button &quot;Log out&quot;&#10;- main:&#10;  - heading &quot;My books&quot; [level=1]&#10;  - textbox &quot;Title&quot;&#10;  - textbox &quot;Author&quot;&#10;  - textbox &quot;Year&quot;&#10;  - button &quot;Add book&quot;&#10;  - table:&#10;    - rowgroup:&#10;[+12 more lines; full report in element text]">page = &lt;Page url='http://127.0.0.1:58261/books'&gt;
+credentials = {'username': 'user-8dd55391', 'password': 'secret123'}
+
+    def test_new_user_lands_on_empty_bookshelf(page, credentials):
+        AuthPage(page).open_register().submit(credentials["username"], credentials["password"])
+    
+        books = BooksPage(page)
+        expect(page).to_have_url(re.compile(r"/books$"))
+        expect(books.current_user).to_have_text(credentials["username"])
+&gt;       expect(books.empty_state).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_visible" get_by_test_id("empty-state") with timeout 5000ms
+E         - waiting for get_by_test_id("empty-state")
+E       
+E       Aria snapshot:
+E       - banner:
+E         - strong: Bookshelf
+E         - text: signed in as user-8dd55391
+E         - button "Log out"
+E       - main:
+E         - heading "My books" [level=1]
+E         - textbox "Title"
+E         - textbox "Author"
+E         - textbox "Year"
+E         - button "Add book"
+E         - table:
+E           - rowgroup:
+E             - row "Title Author Year":
+E               - columnheader "Title"
+E               - columnheader "Author"
+E               - columnheader "Year"
+E               - columnheader
+E           - rowgroup:
+E             - row "From API-7c13d5e3 Robot Delete":
+E               - cell "From API-7c13d5e3"
+E               - cell "Robot"
+E               - cell
+E               - cell "Delete":
+E                 - button "Delete"
+
+tests\ui\test_login_ui.py:14: AssertionError</failure></testcase><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.147" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.532" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.821" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.449" /></testsuite></testsuites>

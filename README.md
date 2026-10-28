@@ -77,12 +77,61 @@ fault flag and lowered its confidence to medium. So the miss is a gap in the
 category definitions, not in the investigation: "flaky" vs "product bug" is
 undefined for an app that is randomly slow, and the model flips between the two.
 
-Next steps:
-- Decide the policy (for example: "an outcome that changes between runs on the
-  same code is `flaky`, wherever the slowness lives") and write it into the
-  category definitions. Then add more flaky runs so the rule isn't tuned to one example.
-- Run each version 3 times. v1 and v2 disagreeing on the same evidence shows one
-  run per version isn't enough to call a difference.
+### Dataset v2: harder runs, three passes
+
+Dataset v2 adds the first `test_bug` runs (the generator edits a copy of the tests:
+a wrong expected value, a mistyped locator, a test that sends next year while
+claiming to test the current year), two more flaky runs and a run mixing a product
+bug with a broken test: 12 runs, 53 failed tests. The agent sees each run's
+edited files through `overlay.json`, like a CI job checking out that commit.
+
+Changes for v3 of the agent: the policy "an outcome that changes between runs on
+the same code is `flaky`, wherever the randomness lives" is now in the category
+definitions, and `--repeat 3` triages the dataset three times to measure consistency.
+
+| Triage on dataset v2 | Runs fully correct | Category accuracy | Grouping correct | Cost |
+|---|---|---|---|---|
+| Baseline (rules) | 2/12 | 70% | 6/12 | $0 |
+| Agent v3, Haiku 5.5, pass 1 | 12/12 | 100% | 12/12 | $0.044 |
+| Agent v3, pass 2 | 12/12 | 100% | 12/12 | $0.040 |
+| Agent v3, pass 3 | 12/12 | 100% | 12/12 | $0.041 |
+
+Every failed test got the same category in all three passes (53/53).
+
+**Why the perfect score needs a caveat:** the traces show the agent searching
+qa-lab for the fault switches (`BUGS`, `year_off_by_one`) and quoting the app's
+docstring that lists the seeded bugs. The test-bug runs have no such shortcut and
+were still solved from evidence (for the locator typo it compared
+`get_by_test_id('add-books')` in the page object with `data-testid="add-book"` in
+the template). But the product-bug and flaky results are inflated. Next: dataset v3
+builds product bugs into the code the same way as test bugs, so the app source
+has no switches or bug list left to find.
+
+### Dataset v3: no shortcuts left
+
+qa-lab's app no longer has fault switches or a bug list. Every fault is now a code
+edit made by the generator to a temporary copy (for example, the book query losing
+its `owner_id` filter, or the title check missing `.strip()`), and the agent sees
+the edited files like any checked-out commit. A scan of the run files finds no
+fault names. The same tests fail as in v2, so the datasets are comparable.
+
+| Triage on dataset v3 | Pass 1 | Pass 2 | Pass 3 | Same category every pass | Cost (3 passes) |
+|---|---|---|---|---|---|
+| Baseline (rules) | 2/12 | | | | $0 |
+| Agent v3 | 10/12 | 12/12 | 12/12 | 91% | $0.103 |
+| Agent v4, report completeness check | **12/12** | **12/12** | **12/12** | **100%** | $0.101 |
+
+Runs fully correct per pass. With nothing to search for, the agent's searches
+follow the evidence (`sleep|random`, `owner_id`, `add-books|data-testid`), and it
+still solves every fault, so the v2 result wasn't only the shortcut.
+
+**What v3 showed:** both misses were reports with an empty list of causes, while
+the summary had the right diagnosis (`not book.title` without `.strip()`; the
+random sleep in `list_books`). The schema allows an empty list, and the model
+sometimes took it. **Fix in v4:** after the final answer, the agent checks that
+every failed test is in exactly one cause; if not, it sends the report back with
+what's missing (at most twice). Over 36 runs the check fired once and the retry
+fixed it.
 
 ## How it works
 
@@ -94,6 +143,9 @@ Next steps:
    Tool errors (bad path, unknown test id) go back to the model so it can correct itself.
 3. It finishes with a JSON report that must match a schema (structured output), so
    the result is always machine-readable and scoreable.
+
+4. The report is checked: every failed test must be in exactly one cause. If not,
+   it goes back to the model with what's missing (at most twice).
 
 Guard rails: paths can't leave the repo, files that describe the seeded faults
 (qa-lab's README and seeding script) are hidden, a turn limit stops runaway loops,
@@ -122,10 +174,8 @@ Use `--model claude-opus-5-5 --effort high` to compare with the strongest model.
 
 ## Known limitations
 
-- qa-lab's app switches faults on with flags, and the flag names are visible in its
-  source. The agent still has to work out which behavior broke from the failures,
-  but a real bug wouldn't be labeled. Next: give the agent a copy of the source with
-  each fault built in.
-- No `test_bug` runs yet. Next: seed broken tests too (wrong locator, wrong
-  expected value).
-- Six runs is a small dataset; the nightly qa-lab job will add more.
+- Twelve runs and eight faults is still a small dataset, and every fault is a
+  one-line edit. Harder cases to add: bugs spread over several files, failures with
+  misleading error messages, and real-world flaky patterns (test order, shared state).
+- Results are for one model at one effort level. Next: the same dataset on
+  `claude-opus-5-5` to see what the extra cost buys, if anything.

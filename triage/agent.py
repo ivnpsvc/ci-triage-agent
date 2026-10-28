@@ -25,9 +25,9 @@ FALLBACK_MODELS = {"claude-opus-5-5", "claude-sonnet-5-5"}
 SYSTEM_PROMPT = """You triage failed CI test runs for a web application's test suite.
 
 For every failed test, decide what caused it:
-- product_bug: the application behaves wrongly and the test is right to fail.
-- test_bug: the test itself is wrong (bad assertion, locator, data or setup).
-- flaky: the outcome depends on timing or chance; the same code could pass on a rerun.
+- product_bug: the application behaves wrongly, every time, and the test is right to fail.
+- test_bug: the test itself is wrong (bad assertion, locator, data or setup) and the application is right.
+- flaky: the outcome depends on timing or chance, so the same code could pass on a rerun. This holds wherever the randomness lives: an application that is only sometimes slow makes the tests that wait on it flaky, not a product_bug. Mention the underlying cause in the explanation and fix.
 - infrastructure: the environment broke (the app could not start, database, network, CI machine), so the failure says nothing about the behavior under test.
 
 Group failures that share one root cause under one cause, so each cause is one thing to fix. Give each cause a short kebab-case cause_id. List tests by their ids exactly as list_failures shows them.
@@ -103,7 +103,23 @@ def add_usage(total: Counter, usage) -> None:
     total["cache_write"] += getattr(usage, "cache_creation_input_tokens", 0) or 0
 
 
-def triage(ws: Workspace, client=None, model: str = MODEL, effort: str = "medium", max_turns: int = 40) -> TriageResult:
+def report_problems(report: dict, failed: list[str]) -> str | None:
+    """What's wrong with a report's coverage, if anything: every failed test must be
+    in exactly one cause. (The schema can't express this, and the model sometimes
+    returned an empty list of causes while its summary had the right diagnosis.)"""
+    listed = [test for cause in report["causes"] for test in cause["tests"]]
+    missing = [t for t in failed if t not in listed]
+    repeated = sorted({t for t in listed if listed.count(t) > 1})
+    problems = []
+    if missing:
+        problems.append("These failed tests are not in any cause: " + ", ".join(missing))
+    if repeated:
+        problems.append("These tests are in more than one cause: " + ", ".join(repeated))
+    return "\n".join(problems) or None
+
+
+def triage(ws: Workspace, client=None, model: str = MODEL, effort: str = "medium", max_turns: int = 40,
+           max_corrections: int = 2) -> TriageResult:
     result = TriageResult(report={"summary": "No failed tests.", "causes": []}, model=model)
     if not ws.failures:
         return result
@@ -114,6 +130,7 @@ def triage(ws: Workspace, client=None, model: str = MODEL, effort: str = "medium
         {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"} if model in FALLBACK_MODELS else {}
     )
     schema = report_schema(list(ws.failures))
+    corrections = 0
     messages = [{"role": "user", "content": first_message(ws)}]
     while result.turns < max_turns:
         result.turns += 1
@@ -143,7 +160,15 @@ def triage(ws: Workspace, client=None, model: str = MODEL, effort: str = "medium
                 result.report = json.loads(text)
             except json.JSONDecodeError as e:
                 raise TriageError(f"Final answer was not valid JSON: {e}")
-            return result
+            problems = report_problems(result.report, list(ws.failures))
+            if problems is None or corrections >= max_corrections:
+                return result
+            # Send the report back once or twice before accepting it as it is.
+            corrections += 1
+            result.trace.append({"turn": result.turns, "tool": "report_check", "input": problems, "is_error": True})
+            messages.append({"role": "user", "content": f"{problems}\n\nReply with the complete report: "
+                             "every failed test in exactly one cause."})
+            continue
 
         tool_results = []
         for block in tool_uses:

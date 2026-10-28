@@ -1,0 +1,73 @@
+{
+  "run_id": "run-02",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 3,
+  "cost_usd": 0.0011,
+  "usage": {
+    "input": 8,
+    "output": 1154,
+    "cache_read": 8955,
+    "cache_write": 3687
+  },
+  "report": {
+    "summary": "The one failure is a product bug: `validate_book` in app/main.py checks `if not book.title`, so a whitespace-only title like \"   \" is accepted and returns 201 instead of 422. Fix the title check to use `.strip()`, matching the author check on the next line, then rerun `test_invalid_book_is_rejected[blank-title]`.",
+    "causes": [
+      {
+        "cause_id": "blank-title-whitespace-accepted",
+        "category": "product_bug",
+        "title": "Whitespace-only book title is not rejected",
+        "explanation": "The title validation tests truthiness of the raw string, so \"   \" is truthy and passes. The author validation right below it calls .strip(), so the two checks are inconsistent. The test expects a 422 with \"Title must not be blank\", which is the documented behavior, so the test is correct and the application is wrong. The behavior is deterministic, so this is not flaky.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:66: AssertionError, assert 201 == 422 (the request was made with book = {'title': '   ', 'author': 'A'})",
+          "app/main.py:75: `if not book.title:` (no strip, so whitespace passes)",
+          "app/main.py:77: `if not book.author.strip():` (author is stripped, title is not)",
+          "tests/api/test_books_api.py:56: ({\"title\": \"   \", \"author\": \"A\"}, \"Title must not be blank\") expects 422"
+        ],
+        "suggested_fix": "In app/main.py validate_book, change line 75 to `if not book.title.strip():`. Optionally add a regression test that a title of only tabs or newlines is also rejected.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "blank|422|title"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 64,
+        "end_line": 90
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py",
+        "start_line": 50,
+        "end_line": 70
+      },
+      "is_error": false
+    }
+  ]
+}

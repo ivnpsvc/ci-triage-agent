@@ -1,0 +1,135 @@
+{
+  "run_id": "run-05",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 6,
+  "cost_usd": 0.0037,
+  "usage": {
+    "input": 14,
+    "output": 4131,
+    "cache_read": 47423,
+    "cache_write": 9497
+  },
+  "report": {
+    "summary": "All 26 tests error during the session-scoped base_url fixture because the uvicorn app process exits with code 1 before it answers /health. Nothing in the test or app code changed to explain this, and the failure is uniform across api and ui, so treat it as an environment problem; run the app by hand from the repo root with the same DB_PATH to get the startup traceback, which the CI log does not capture.",
+    "causes": [
+      {
+        "cause_id": "app-fails-to-start-in-test-env",
+        "category": "infrastructure",
+        "title": "Bookshelf app process exits with code 1 at startup, so no test body runs",
+        "explanation": "tests/conftest.py starts the app as a subprocess (`python -m uvicorn app.main:app`) with DB_PATH pointing at a fresh temp database, then polls /health. The child exits with code 1 before serving, and _wait_until_up raises RuntimeError at setup, so every test that uses base_url (directly or via new_user/api/anon_api) errors before its body runs. The app's import-time code (app/main.py:57-58, `with db(): _conn.executescript(SCHEMA)`) creates the schema through sqlite3 and is the most likely point of failure. The app source has no obvious syntax or import problem, and the failure is identical for every test, so the cause is the environment rather than any single test. Uvicorn's stderr is not captured (--log-level warning, output goes to the console), so the actual exception is not in this report. The Windows paths in the traceback suggest a local venv at C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.venv. Likely candidates to check are a missing or mismatched uvicorn/fastapi install in that venv, an APP_DB_PATH or DB_PATH the process cannot open (missing directory, locked file, or a database shared between xdist workers), or a port problem. The error is not caused by the tests' assertions, and nothing here shows the app behaving wrongly.",
+        "evidence": [
+          "tests/conftest.py:35: raise RuntimeError(f\"App exited early with code {proc.returncode}\") (proc.returncode is 1 in the Popen repr)",
+          "tests/conftest.py:58-62: subprocess.Popen([sys.executable, \"-m\", \"uvicorn\", \"app.main:app\", \"--port\", str(port), \"--log-level\", \"warning\"], cwd=ROOT, env=env) with stdout/stderr not redirected, so the app's error output is not in the report",
+          "tests/conftest.py:56: db_path = os.environ.get(\"APP_DB_PATH\") or str(tmp_path_factory.mktemp(\"db\") / \"bookshelf.db\")",
+          "app/main.py:57-58: `with db() as _conn: _conn.executescript(SCHEMA)` runs at import time, so any DB error stops the app before it serves",
+          "app/main.py:20: DB_PATH = os.environ.get(\"DB_PATH\", \"bookshelf.db\")",
+          "requirements.txt:1-2 lists fastapi and uvicorn; the failing venv's installed packages were not checked",
+          "All 26 errors are identical ('failed on setup with \"RuntimeError: App exited early with code 1\"'), across api and ui suites, so no test-specific cause applies"
+        ],
+        "suggested_fix": "Reproduce outside pytest: from the repo root, run `set DB_PATH=%TEMP%\\bk_test.db` then `python -m uvicorn app.main:app --port 8765 --log-level warning` with the same venv, and read the traceback. Check that `python -m pip show uvicorn fastapi` succeeds in that venv and matches requirements.txt. If APP_DB_PATH is set in the environment, unset it or point it at a writable path. Then rerun pytest. To make future failures diagnosable, redirect the subprocess output (for example stderr=subprocess.PIPE, or to a log file under reports/) and include the captured output in the RuntimeError message.",
+        "confidence": "medium",
+        "tests": [
+          "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected",
+          "tests.api.test_auth_api::test_register_returns_created_user",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-short]",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[password-too-short]",
+          "tests.api.test_auth_api::test_books_require_a_token",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-long]",
+          "tests.api.test_auth_api::test_duplicate_username_is_rejected",
+          "tests.api.test_auth_api::test_login_returns_token",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_deleted_book_is_gone",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.api.test_books_api::test_current_year_is_accepted",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]",
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]",
+          "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]",
+          "tests.ui.test_login_ui::test_books_page_requires_login[chromium]",
+          "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]",
+          "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "search_code",
+      "input": {
+        "pattern": "DB_PATH|APP_DB_PATH|sqlite|create_all|CREATE TABLE|import "
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "end_line": 60
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "search_code",
+      "input": {
+        "pattern": "uvicorn|fastapi|httpx|pytest-xdist"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 5,
+      "tool": "search_code",
+      "input": {
+        "pattern": "health|raise|exit|sys\\.",
+        "path_glob": "app/*"
+      },
+      "is_error": false
+    }
+  ]
+}

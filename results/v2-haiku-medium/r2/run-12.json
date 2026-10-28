@@ -1,0 +1,192 @@
+{
+  "run_id": "run-12",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0042,
+  "usage": {
+    "input": 10,
+    "output": 4403,
+    "cache_read": 32096,
+    "cache_write": 13262
+  },
+  "report": {
+    "summary": "Two separate causes account for all four failures. The UI tests fail because the page object clicks a test id that does not exist (\"add-books\" in tests/support/pages.py:44, while the template uses \"add-book\"), which is a test bug and the quickest fix. The API and login tests fail because GET /api/books and the bookshelf page return other users' books, which is a product bug in app/main.py's leak_books path; check whether BUGS=leak_books is set in the CI environment and fix list_books.",
+    "causes": [
+      {
+        "cause_id": "leak-books-cross-user-visibility",
+        "category": "product_bug",
+        "title": "Book listing returns every user's books (leak_books path)",
+        "explanation": "list_books() has a branch that, when the 'leak_books' seeded bug is enabled, runs an unfiltered SELECT over all books instead of filtering by owner_id. The API test creates a book as one user and then expects another user's list not to contain it, but the other user's list includes it. The login test registers a brand-new user, who should have an empty bookshelf, but the rendered table contains a row created by a different test's API user. The failure is deterministic and the test expectations are correct, so the application is at fault. The workflow file does not set BUGS, so the leak must be enabled through the runner environment or a config that was not included in the repo; confirm this first. The 'slow_list' seeded bug is not implicated in these failures: the login failure is an element-not-found, not a timeout.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:42: AssertionError, assert 2 not in [1, 2] (the second user's list_books() returned the first user's book id 2)",
+          "app/main.py:163-164: if \"leak_books\" in BUGS: rows = conn.execute(\"SELECT * FROM books ORDER BY id\").fetchall()  (no owner_id filter; the normal path at line 166 filters by owner_id)",
+          "app/main.py:270: render_books() calls list_books(user[\"id\"]), so the books page inherits the leak",
+          "Aria snapshot in tests\\ui\\test_login_ui.py failure: a freshly registered user sees row \"From API-d19d31c9 Robot Delete\", which was created by another test's API fixture, and the empty-state element is absent as a result",
+          "tests\\ui\\test_login_ui.py:14: expect(books.empty_state).to_be_visible() fails with element(s) not found",
+          "app/main.py:11 documents leak_books as 'GET /api/books returns every user's books'"
+        ],
+        "suggested_fix": "Remove the leak_books branch from list_books() (or make sure BUGS is unset in CI and in any environment the suite runs against). Then re-run the api and ui suites. Add a guard so the seeded bug cannot be enabled in the CI environment by accident.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+        ]
+      },
+      {
+        "cause_id": "add-book-button-testid-mismatch",
+        "category": "test_bug",
+        "title": "Page object clicks a test id the template does not have",
+        "explanation": "BooksPage.add() clicks get_by_test_id(\"add-books\"), but the books template renders the submit button with data-testid=\"add-book\". Playwright waits for a locator that never exists and times out after 5 s before any form input is checked. Both UI tests that add a book fail at this step, so their real assertions never run. The application markup is correct, so the fix belongs in the test code. Once the locator is fixed, test_future_year_shows_error_and_keeps_input will exercise the year check. With the year_off_by_one seeded bug enabled, next year would be accepted and that test would then fail for a real product reason. That is a possible follow-up risk, not something this run shows.",
+        "evidence": [
+          "tests\\ui\\test_books_ui.py:13 and :42 are the add() calls that fail",
+          "tests\\support\\pages.py:44: self.page.get_by_test_id(\"add-books\").click()",
+          "app/templates/books.html:9: <button type=\"submit\" data-testid=\"add-book\">Add book</button>",
+          "Playwright call log: \"waiting for get_by_test_id(\"add-books\")\" then Timeout 5000ms exceeded"
+        ],
+        "suggested_fix": "Change tests/support/pages.py:44 to get_by_test_id(\"add-book\"). Alternatively, rename the template attribute to match, but the page object is the simpler fix. Then re-run both UI tests. Afterwards, check that test_future_year still fails if year_off_by_one is enabled, to confirm the year validation is covered.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_users_cannot_see_each_others_books"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_login_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 300,
+        "end_line": 400
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "add-book|BUGS|leak_books|slow_list"
+      },
+      "is_error": false
+    }
+  ]
+}

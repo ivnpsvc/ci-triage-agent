@@ -1,0 +1,169 @@
+{
+  "run_id": "run-11",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0039,
+  "usage": {
+    "input": 10,
+    "output": 3585,
+    "cache_read": 25368,
+    "cache_write": 14896
+  },
+  "report": {
+    "summary": "Two product bugs in app/main.py explain all four failures. First, list_books() ignores user_id, so every user sees every user's books, which also keeps the empty-state from rendering for a new user; fix that query filter first. Second, validate_book() allows years up to this_year + 1 while its error message says 'between 1 and {this_year}', so next-year books are saved instead of rejected; fix the bound at app/main.py:83.",
+    "causes": [
+      {
+        "cause_id": "book-list-not-scoped-to-owner",
+        "category": "product_bug",
+        "title": "Book list returns every user's books",
+        "explanation": "list_books() runs an unfiltered 'SELECT * FROM books ORDER BY id' and never uses its user_id argument, so /api/books and the /books page return books owned by other users. The API isolation test fails because another user's list contains the newly created book. The UI test fails for the same reason: a brand-new user's page lists other users' rows, so the empty-state element never appears. Single-book GET and DELETE are scoped correctly (get_own_book filters on owner_id), which is why only the list leaks.",
+        "evidence": [
+          "app/main.py:147-150: def list_books(user_id: int) ... rows = conn.execute(\"SELECT * FROM books ORDER BY id\").fetchall()",
+          "app/main.py:166: \"SELECT * FROM books WHERE id = ? AND owner_id = ?\" (get_own_book is scoped; list_books is not)",
+          "tests/api/test_books_api.py:41-42: other_ids = [b[\"id\"] for b in other_api.list_books().json()]; assert book[\"id\"] not in other_ids -> assert 2 not in [1, 2]",
+          "tests/ui/test_login_ui.py:14: expect(books.empty_state).to_be_visible() -> element(s) not found",
+          "Aria snapshot for user-3ff1fcac shows rows 'New-1fdb9c45 Someone 2026' and 'Dune-04194f69 Frank Herbert 1965' that belong to other users, with no empty-state paragraph"
+        ],
+        "suggested_fix": "Filter the query by owner: \"SELECT * FROM books WHERE owner_id = ? ORDER BY id\", passing user_id. Add a test that the list excludes other users' books. Then re-run both tests; the UI empty-state test should pass without changes.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+        ]
+      },
+      {
+        "cause_id": "year-upper-bound-off-by-one",
+        "category": "product_bug",
+        "title": "Next-year books are accepted (year bound allows this_year + 1)",
+        "explanation": "validate_book() accepts any year up to this_year + 1, but its error text says the year must be between 1 and this_year. The tests and the message both expect next year to be rejected with 422 and 'Year must be between'. Because the check passes, the API returns 201 and the UI saves the book (the 2027 row appears in the table) with no error shown. The test is consistent with the app's own message, so the code is what looks wrong. Confidence is high but not certain: the intent could in principle be to allow next year, but then the message and the existing test would both be wrong.",
+        "evidence": [
+          "app/main.py:82-84: this_year = date.today().year; if not 1 <= book.year <= this_year + 1: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "tests/api/test_books_api.py:58: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\"),",
+          "tests/api/test_books_api.py:66: assert response.status_code == 422 -> assert 201 == 422",
+          "tests/ui/test_books_ui.py:44: expect(books.error).to_contain_text(\"Year must be between\") -> element(s) not found; the aria snapshot shows row 'Future-94641044 Someone 2027' saved"
+        ],
+        "suggested_fix": "Change the check to 'if not 1 <= book.year <= this_year:' so it matches the error message and the test. Also confirm with the product owner that next-year books should be rejected. Re-run test_invalid_book_is_rejected[next-year] and test_future_year_shows_error_and_keeps_input.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_users_cannot_see_each_others_books"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/data.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_login_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "owner_id|this_year|THIS_YEAR"
+      },
+      "is_error": false
+    }
+  ]
+}

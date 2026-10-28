@@ -1,0 +1,127 @@
+{
+  "run_id": "run-05",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0032,
+  "usage": {
+    "input": 10,
+    "output": 3364,
+    "cache_read": 26786,
+    "cache_write": 9732
+  },
+  "report": {
+    "summary": "All 26 tests errored in the session-scoped base_url fixture (tests/conftest.py:65) before any test body ran, because the app process started by the fixture exited with code 1. The app code reads cleanly and the failure is in the startup environment, so the first step is to run `python -m uvicorn app.main:app --port 8000` with DB_PATH set in the same venv to see the traceback that CI discarded.",
+    "causes": [
+      {
+        "cause_id": "app-process-exits-on-startup",
+        "category": "infrastructure",
+        "title": "Test-session app subprocess exits with code 1 before serving /health",
+        "explanation": "The base_url fixture launches uvicorn as a subprocess and polls /health. The process exited with return code 1 before becoming reachable, so _wait_until_up raised 'App exited early'. Every test that depends on base_url (directly or through new_user, api, anon_api, other_api, or the UI fixtures) errors at setup, which is why all 26 show the same error. The subprocess is started with --log-level warning and its stderr is not captured, so the actual exception is not in the CI report. I found nothing in app/main.py that would fail at import: the schema runs via executescript at import (app/main.py:57-58), and DB_PATH comes from the env the fixture sets. The traceback most likely comes from the local environment (the run is on Windows under C:\\Users\\IvanPosavec\\Documents\\qa-lab\\.venv, not the ubuntu CI job in .github/workflows/tests.yml), for example a missing or mismatched dependency in the venv (fastapi, uvicorn, jinja2, python-multipart from requirements.txt), an unwritable DB path, or a port problem. This is inference only: the process's stderr is not in the report, so confidence is low-to-medium.",
+        "evidence": [
+          "tests\\conftest.py:35: raise RuntimeError(f\"App exited early with code {proc.returncode}\") with returncode 1 for args ['C:\\\\Users\\\\IvanPosavec\\\\Documents\\\\qa-lab\\\\.ve...']",
+          "tests\\conftest.py:59-62: subprocess.Popen([sys.executable, \"-m\", \"uvicorn\", \"app.main:app\", \"--port\", str(port), \"--log-level\", \"warning\"], cwd=ROOT, env=env) with no stdout/stderr capture",
+          "tests\\conftest.py:56-57: db_path from APP_DB_PATH or tmp_path_factory; env = {**os.environ, \"DB_PATH\": db_path}",
+          "app/main.py:57-58: with db() as _conn: _conn.executescript(SCHEMA) runs at import time",
+          "requirements.txt:1-4: fastapi>=0.115, uvicorn>=0.30, jinja2>=3.1, python-multipart>=0.0.9"
+        ],
+        "suggested_fix": "Reproduce locally: from the repo root run `set DB_PATH=%TEMP%\\bk.db && python -m uvicorn app.main:app --port 8001 --log-level warning` (or run it without the flag) and read the traceback. Fix whatever it reports (reinstall requirements-dev.txt in the venv, check that the DB path is writable). Consider having conftest capture the subprocess stderr (e.g. write it to a log file) and include it in the RuntimeError, so the next failure is self-explanatory. Also, `-n auto` with APP_DB_PATH set would make every xdist worker share one DB file; keep that in mind if that variable is ever set in CI.",
+        "confidence": "medium",
+        "tests": [
+          "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected",
+          "tests.api.test_auth_api::test_register_returns_created_user",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-short]",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[password-too-short]",
+          "tests.api.test_auth_api::test_books_require_a_token",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-long]",
+          "tests.api.test_auth_api::test_duplicate_username_is_rejected",
+          "tests.api.test_auth_api::test_login_returns_token",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_deleted_book_is_gone",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.api.test_books_api::test_current_year_is_accepted",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]",
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]",
+          "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]",
+          "tests.ui.test_login_ui::test_books_page_requires_login[chromium]",
+          "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]",
+          "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_auth_api::test_register_returns_created_user"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 400
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "APP_DB_PATH|DB_PATH|BASE_URL"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "requirements.txt"
+      },
+      "is_error": false
+    }
+  ]
+}

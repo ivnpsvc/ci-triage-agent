@@ -1,0 +1,75 @@
+{
+  "run_id": "run-02",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 3,
+  "cost_usd": 0.0012,
+  "usage": {
+    "input": 8,
+    "output": 1319,
+    "cache_read": 8941,
+    "cache_write": 3767
+  },
+  "report": {
+    "summary": "One test failed: the blank-title case sends a whitespace-only title ('   ') and the API accepts it with 201 instead of rejecting it with 422. The cause is in app/main.py:75, where the title check does not strip whitespace while the author check on line 77 does. Fix validate_book so the title check uses book.title.strip(), then rerun test_invalid_book_is_rejected.",
+    "causes": [
+      {
+        "cause_id": "whitespace-title-accepted",
+        "category": "product_bug",
+        "title": "Whitespace-only book title is accepted by the API",
+        "explanation": "validate_book() checks the title with `if not book.title`, which only rejects the empty string. A title of three spaces is truthy, so it passes validation and the book is inserted. The author check two lines below uses `book.author.strip()`, so the title check is inconsistent with it. The test is correct to expect 422 with 'Title must not be blank', and the other three parametrized cases pass, which points to this one check rather than the test setup or the environment. This is deterministic, not timing-related.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:66: AssertionError, assert 201 == 422, where 201 = <Response [201 Created]>.status_code",
+          "book = {'title': '   ', 'author': 'A'}, message = 'Title must not be blank'",
+          "app/main.py:75: `if not book.title:` (no strip; whitespace-only string is truthy)",
+          "app/main.py:76: raise HTTPException(422, \"Title must not be blank\")",
+          "app/main.py:77: `if not book.author.strip():` (author check strips, title check does not)",
+          "app/main.py:157-158: the book is inserted with user_id, book.title, book.author, book.year after validation passes"
+        ],
+        "suggested_fix": "In app/main.py validate_book(), change line 75 to `if not book.title.strip():` so whitespace-only titles raise HTTPException(422, \"Title must not be blank\"). Consider also stripping the stored title in BookIn or insert_book so stored values are normalized. Add a UI or API case for a whitespace-only title if one does not already exist.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "blank|422|title"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 62,
+        "end_line": 90
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py",
+        "start_line": 50,
+        "end_line": 70
+      },
+      "is_error": false
+    }
+  ]
+}
