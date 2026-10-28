@@ -1,0 +1,129 @@
+{
+  "run_id": "run-01",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0029,
+  "usage": {
+    "input": 10,
+    "output": 2215,
+    "cache_read": 16944,
+    "cache_write": 13249
+  },
+  "report": {
+    "summary": "Both failures share one root cause: the app accepts a publication year of next year (2027), so the API returns 201 instead of 422 and the UI saves the book instead of showing the 'Year must be between' error. Fix the app's year validation first (app/main.py:94, the year_off_by_one seeded bug), and check where BUGS=year_off_by_one is set for this CI run, since the workflow file does not set it.",
+    "causes": [
+      {
+        "cause_id": "next-year-accepted-by-seeded-bug",
+        "category": "product_bug",
+        "title": "Publication year one past the current year is accepted when year_off_by_one is enabled",
+        "explanation": "validate_book() computes max_year as this_year + 1 when the 'year_off_by_one' flag is in BUGS, so a year of next year passes validation. The error message still says 'between 1 and {this_year}', so the app contradicts itself. Both tests correctly expect rejection of next year, so they fail for the right reason. The year-zero case still passes, which fits a bug limited to the upper bound. The UI test's aria snapshot shows the 2027 book was saved in the table, confirming the server accepted it.",
+        "evidence": [
+          "tests/api/test_books_api.py:66: assert 201 == 422 (test param next-year: {\"title\": \"T\", \"author\": \"A\", \"year\": 2027}, message 'Year must be between')",
+          "tests/ui/test_books_ui.py:44: expect(books.error).to_contain_text(\"Year must be between\") -> Actual value: None, error(s) not found",
+          "UI aria snapshot: row \"Future-56fcdf9f Someone 2027 Delete\" exists, so the book was persisted",
+          "app/main.py:94: max_year = this_year + 1 if \"year_off_by_one\" in BUGS else this_year",
+          "app/main.py:95-96: if not 1 <= book.year <= max_year: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "app/main.py:9: docstring: year_off_by_one  accepts next year as a publication year",
+          "Workflow .github/workflows/tests.yml sets no BUGS env var, so the flag must come from the CI environment or a secret; this was not verified from the run itself"
+        ],
+        "suggested_fix": "Change app/main.py:94 so the upper bound is always this_year (remove the year_off_by_one branch), or stop enabling BUGS=year_off_by_one for this pipeline if the seeded bug is not meant to be active in this run. Then rerun the api and ui suites. Do not change the tests, since their expectations match the documented rule.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/data.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": ".github/workflows/tests.yml"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 305,
+        "end_line": 400
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "BUGS|year_off_by_one"
+      },
+      "is_error": false
+    }
+  ]
+}
