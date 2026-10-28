@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="19" failures="0" skipped="0" tests="26" time="5.103" timestamp="2026-10-29T00:20:16.678475+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="0.978" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="0.987" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.026" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.384" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.372"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002B552924FE0&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.318" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.725"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x00000177341B4D60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.405"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002AE91944D60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.756"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x0000010D01E54F40&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.345"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002B552925620&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.350"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x00000177341B4EA0&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="0.393"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002AE91945120&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.415"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x0000010D01E54D60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.375"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002B552924D60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.365"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x00000177341B4F40&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.363"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002AE91945620&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.358"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x0000010D01E553A0&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="0.846"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002B553BBBE20&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.278" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="0.894"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000001773544BF60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="0.914"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002AE92BDBEC0&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="0.914"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x0000010D030EBF60&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.165" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.489"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x00000177354C3920&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.531"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002AE92C519E0&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.478"><error message="failed on setup with &quot;KeyError: 'token'&quot;">new_user = &lt;function new_user.&lt;locals&gt;.create at 0x000002B553C5B740&gt;
+
+    @pytest.fixture
+    def user(new_user) -&gt; dict:
+&gt;       return new_user()
+               ^^^^^^^^^^
+
+tests\conftest.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def create() -&gt; dict:
+        creds = {"username": unique("user"), "password": TEST_PASSWORD}
+        with BookshelfApi(base_url) as anon:
+            anon.register(**creds).raise_for_status()
+&gt;           token = anon.login(creds["password"], creds["username"]).json()["token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+tests\conftest.py:86: KeyError</error></testcase></testsuite></testsuites>

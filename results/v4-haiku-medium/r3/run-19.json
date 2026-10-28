@@ -1,0 +1,184 @@
+{
+  "run_id": "run-19",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0042,
+  "usage": {
+    "input": 12,
+    "output": 3737,
+    "cache_read": 35892,
+    "cache_write": 15795
+  },
+  "report": {
+    "summary": "Three of the four failures share one product bug: the GET-by-id API returns the year under the key \"published\" (app/main.py:144), while create and update return \"year\", and the books table template reads b.year (books.html:19), so the year cell renders empty. Fix book_dict to emit \"year\" and fix the template to match, which should clear test_created_book_can_be_fetched, test_book_can_be_updated and the UI test. The fourth failure, test_current_year_is_accepted, is a test bug: it posts THIS_YEAR + 1, which the app correctly rejects, so change it to THIS_YEAR.",
+    "causes": [
+      {
+        "cause_id": "book-year-key-mismatch",
+        "category": "product_bug",
+        "title": "GET and list responses rename year to published, so the year is missing from the API and UI",
+        "explanation": "book_dict() maps the database year column to a \"published\" key. POST /api/books and PUT /api/books/{id} return the BookIn fields, which use \"year\". So a book's shape differs depending on the endpoint: the create response has \"year\" while GET /api/books/{id} has \"published\". The tests compare GET output to the create or update payload using \"year\", so they fail. The UI has the same root cause: render_books passes book_dict output to books.html, which reads b.year. That key no longer exists, so the Year cell is empty and the test that looks for '1965' in the row fails. The application code is the outlier here, so the tests are right to fail.",
+        "evidence": [
+          "app/main.py:144: return {\"id\": row[\"id\"], \"title\": row[\"title\"], \"author\": row[\"author\"], \"published\": row[\"year\"]}",
+          "app/main.py:160: return {\"id\": cur.lastrowid, **book.model_dump()}  (create response uses the 'year' key)",
+          "app/templates/books.html:19: <td>{{ b.year or \"\" }}</td>",
+          "tests/api/test_books_api.py:17: assert fetched.json() == book  -> E   Left contains 1 more item: {'published': 1965}  Right contains 1 more item: {'year': 1965}",
+          "tests/api/test_books_api.py:26-28: expects {\"id\", \"title\", \"author\", \"year\": 2001} from GET, but the actual response has 'published' instead of 'year'",
+          "tests/ui/test_books_ui.py:16: expect(books.row(title)).to_contain_text(\"1965\")  -> Actual value row text: 'Dune-7d9786a3 / Frank Herbert / (empty) / Delete', so the year cell is blank"
+        ],
+        "suggested_fix": "In app/main.py book_dict(), return \"year\": row[\"year\"] instead of \"published\", so every endpoint uses one shape. Update books.html if needed, though b.year will then resolve correctly. Check any external API consumers before shipping the rename, since they may already rely on \"published\".",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      },
+      {
+        "cause_id": "current-year-off-by-one-in-test",
+        "category": "test_bug",
+        "title": "test_current_year_is_accepted submits next year, which the app rejects by design",
+        "explanation": "The test is named for the current year but submits THIS_YEAR + 1. validate_book() only accepts 1 <= year <= date.today().year, so the server returns 422 as intended. The file already tests the next-year rejection case in test_invalid_book_is_rejected, which confirms the intended rule. The test's data is wrong, not the application.",
+        "evidence": [
+          "tests/api/test_books_api.py:47-50: response = api.create_book(title=unique(\"New\"), author=\"Someone\", year=THIS_YEAR + 1) ... assert response.status_code == 201",
+          "test failure: assert 422 == 201  where 422 = <Response [422 Unprocessable Entity]>",
+          "app/main.py:82-84: this_year = date.today().year; if not 1 <= book.year <= this_year: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "tests/api/test_books_api.py:58: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\") confirms next year is meant to be rejected"
+        ],
+        "suggested_fix": "Change the payload in test_current_year_is_accepted to year=THIS_YEAR so it tests the boundary the name describes. Optionally also assert the response body.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_current_year_is_accepted"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_book_can_be_updated"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_current_year_is_accepted"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_created_book_can_be_fetched"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/data.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "search_code",
+      "input": {
+        "pattern": "published|\\.year|\"year\""
+      },
+      "is_error": false
+    }
+  ]
+}

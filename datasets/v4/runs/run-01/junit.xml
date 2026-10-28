@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="26" time="11.918" timestamp="2026-10-29T00:18:26.816765+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.096" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.121" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.169" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.374" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.572" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.828" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.365" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.821" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.764" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.843" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.855" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.847" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.813" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.861" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.821"><failure message="assert 201 == 422&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">api = &lt;tests.support.api.BookshelfApi object at 0x000002757BB82630&gt;
+book = {'title': 'T', 'author': 'A', 'year': 2027}
+message = 'Year must be between'
+
+    @pytest.mark.parametrize(
+        "book, message",
+        [
+            ({"title": "   ", "author": "A"}, "Title must not be blank"),
+            ({"title": "T", "author": ""}, "Author must not be blank"),
+            ({"title": "T", "author": "A", "year": THIS_YEAR + 1}, "Year must be between"),
+            ({"title": "T", "author": "A", "year": 0}, "Year must be between"),
+        ],
+        ids=["blank-title", "empty-author", "next-year", "year-zero"],
+    )
+    def test_invalid_book_is_rejected(api, book, message):
+        response = api.create_book(**book)
+    
+&gt;       assert response.status_code == 422
+E       assert 201 == 422
+E        +  where 201 = &lt;Response [201 Created]&gt;.status_code
+
+tests\api\test_books_api.py:66: AssertionError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="1.473" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.659" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="1.071" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="1.458" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="1.486" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.299" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="5.713"><failure message="AssertionError: Locator expected to contain text 'Year must be between'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; get_by_test_id(&quot;error&quot;) with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;error&quot;)&#10;&#10;Aria snapshot:&#10;- banner:&#10;  - strong: Bookshelf&#10;  - text: signed in as user-9ec3bc25&#10;  - button &quot;Log out&quot;&#10;- main:&#10;  - heading &quot;My books&quot; [level=1]&#10;  - textbox &quot;Title&quot;&#10;  - textbox &quot;Author&quot;&#10;  - textbox &quot;Year&quot;&#10;  - button &quot;Add book&quot;&#10;  - table:&#10;    - rowgroup:&#10;[+12 more lines; full report in element text]">logged_in_page = &lt;Page url='http://127.0.0.1:54971/books'&gt;
+
+    def test_future_year_shows_error_and_keeps_input(logged_in_page):
+        books = BooksPage(logged_in_page).open()
+        title = unique("Future")
+    
+        books.add(title, "Someone", str(date.today().year + 1))
+    
+&gt;       expect(books.error).to_contain_text("Year must be between")
+E       AssertionError: Locator expected to contain text 'Year must be between'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" get_by_test_id("error") with timeout 5000ms
+E         - waiting for get_by_test_id("error")
+E       
+E       Aria snapshot:
+E       - banner:
+E         - strong: Bookshelf
+E         - text: signed in as user-9ec3bc25
+E         - button "Log out"
+E       - main:
+E         - heading "My books" [level=1]
+E         - textbox "Title"
+E         - textbox "Author"
+E         - textbox "Year"
+E         - button "Add book"
+E         - table:
+E           - rowgroup:
+E             - row "Title Author Year":
+E               - columnheader "Title"
+E               - columnheader "Author"
+E               - columnheader "Year"
+E               - columnheader
+E           - rowgroup:
+E             - row "Future-d41404e1 Someone 2027 Delete":
+E               - cell "Future-d41404e1"
+E               - cell "Someone"
+E               - cell "2027"
+E               - cell "Delete":
+E                 - button "Delete"
+
+tests\ui\test_books_ui.py:44: AssertionError</failure></testcase><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="1.069" /><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.139" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.520" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.411" /></testsuite></testsuites>

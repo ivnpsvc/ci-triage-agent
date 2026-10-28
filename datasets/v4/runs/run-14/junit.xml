@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="26" time="16.999" timestamp="2026-10-29T00:20:42.504413+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.003" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.011" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.064" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.399" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.514" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.834" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.316" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.836" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.813" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.797" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.821" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.802" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.795" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.809" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.809" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="5.880" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="6.122" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="5.988"><failure message="playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.&#10;Call log:&#10;  - navigating to &quot;http://127.0.0.1:53126/books&quot;, waiting until &quot;load&quot;">logged_in_page = &lt;Page url='about:blank'&gt;
+api = &lt;tests.support.api.BookshelfApi object at 0x000001C9375DF9B0&gt;
+
+    def test_book_created_through_api_shows_in_ui(logged_in_page, api):
+        title = unique("From API")
+        api.create_book(title=title, author="Robot").raise_for_status()
+    
+&gt;       books = BooksPage(logged_in_page).open()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\ui\test_books_ui.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\support\pages.py:34: in open
+    self.page.goto("/books")
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\sync_api\_generated.py:18528: in goto
+    self._sync(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_page.py:564: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_frame.py:157: in goto
+    await self._channel.send(
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:78: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000001C936F2A090&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001C938989300&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 5000ms exceeded.
+E           Call log:
+E             - navigating to "http://127.0.0.1:53126/books", waiting until "load"
+
+C:\Users\IvanPosavec\Documents\qa-lab\.venv\Lib\site-packages\playwright\_impl\_connection.py:636: TimeoutError</failure></testcase><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="7.003" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.389" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.682" /><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.074" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.625" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="3.722" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="6.459" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="1.858" /></testsuite></testsuites>

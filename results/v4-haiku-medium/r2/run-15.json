@@ -1,0 +1,111 @@
+{
+  "run_id": "run-15",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0025,
+  "usage": {
+    "input": 10,
+    "output": 2223,
+    "cache_read": 17884,
+    "cache_write": 9629
+  },
+  "report": {
+    "summary": "The only failure, test_added_book_is_listed, is caused by a random stale-read cache in the app, not by the test. list_books in app/main.py returns a cached list 70% of the time and is never invalidated on add, so the new book often does not appear. Treat it as flaky, and fix the app by invalidating or removing the cache on insert, update and delete.",
+    "causes": [
+      {
+        "cause_id": "stale-book-list-cache",
+        "category": "flaky",
+        "title": "list_books serves a randomly stale cached list that is never invalidated after inserts",
+        "explanation": "app/main.py:148-157 keeps a per-user cache (_recent_lists). list_books returns the cached list whenever the user is already cached and random.random() < 0.7, so roughly 70% of page loads ignore the database. The test opens /books first, which caches an empty list for the user. It then adds a book; insert_book (main.py:160-167) and the POST /books handler (main.py:321-340) never touch _recent_lists. The redirect to GET /books then renders the stale empty list about 70% of the time. The row only appears in the other ~30%, so the same code can pass on a rerun. The test's assertion is correct: the book was saved and the page should show it. The randomness is the trigger, but the missing cache invalidation is a real application defect that makes the failure reproducible in principle. Delete and update paths have the same gap.",
+        "evidence": [
+          "AssertionError: Locator expected to contain text 'Frank Herbert' / Actual value: None / Error: element(s) not found (waiting for get_by_test_id(\"book-row\").filter(has_text=\"Dune-703ef518\"))",
+          "Aria snapshot at failure: paragraph: No books yet. (data-testid=\"empty-state\" is rendered, so the page was given an empty list)",
+          "app/main.py:152-153: `if user_id in _recent_lists and random.random() < 0.7: return _recent_lists[user_id]`",
+          "app/main.py:156: `_recent_lists[user_id] = [book_dict(r) for r in rows]` (cache written only on the DB path)",
+          "app/main.py:160-167 insert_book writes to the DB and does not clear _recent_lists; app/main.py:336-340 redirects straight back to GET /books",
+          "tests/ui/test_books_ui.py:13-15 add the book, then assert the row contains the author. The test and page object (tests/support/pages.py:37-44) look correct."
+        ],
+        "suggested_fix": "In app/main.py, remove the random cache shortcut in list_books, or invalidate it on every write: pop _recent_lists[user_id] in insert_book, in api_update_book, and in books_delete and api_delete_book. Then the list always reflects the database. Do not change the test. To confirm, run this test repeatedly (for example 20 times with pytest --count or a loop) and check that the failure rate is about 70% before the fix and 0% after.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "_recent_lists|random"
+      },
+      "is_error": false
+    }
+  ]
+}

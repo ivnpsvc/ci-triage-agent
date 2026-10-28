@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="26" time="10.839" timestamp="2026-10-29T00:21:53.132105+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="1.025" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.067" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.052" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.381" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.475" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.357" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.833" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.808" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.827"><failure message="AssertionError: assert {'id': 1, 'ti...lished': 2001} == {'id': 1, 'ti... 'year': 2001}&#10;  &#10;  Omitting 3 identical items, use -vv to show&#10;  Left contains 1 more item:&#10;  {'published': 2001}&#10;  Right contains 1 more item:&#10;  {'year': 2001}&#10;  Use -v to get more diff">api = &lt;tests.support.api.BookshelfApi object at 0x000002582DC82030&gt;
+
+    def test_book_can_be_updated(api):
+        book = api.create_book(title=unique("Draft"), author="Someone").json()
+    
+        updated = api.update_book(book["id"], title="Final title", author="Someone", year=2001)
+    
+        assert updated.status_code == 200
+&gt;       assert api.get_book(book["id"]).json() == {
+            "id": book["id"], "title": "Final title", "author": "Someone", "year": 2001,
+        }
+E       AssertionError: assert {'id': 1, 'ti...lished': 2001} == {'id': 1, 'ti... 'year': 2001}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'published': 2001}
+E         Right contains 1 more item:
+E         {'year': 2001}
+E         Use -v to get more diff
+
+tests\api\test_books_api.py:26: AssertionError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.686"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">api = &lt;tests.support.api.BookshelfApi object at 0x000001731EE046B0&gt;
+
+    def test_current_year_is_accepted(api):
+        response = api.create_book(title=unique("New"), author="Someone", year=THIS_YEAR + 1)
+    
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests\api\test_books_api.py:50: AssertionError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.813" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.831"><failure message="AssertionError: assert {'id': 1, 'ti...lished': 1965} == {'id': 1, 'ti... 'year': 1965}&#10;  &#10;  Omitting 3 identical items, use -vv to show&#10;  Left contains 1 more item:&#10;  {'published': 1965}&#10;  Right contains 1 more item:&#10;  {'year': 1965}&#10;  Use -v to get more diff">api = &lt;tests.support.api.BookshelfApi object at 0x000001F634D51070&gt;
+
+    def test_created_book_can_be_fetched(api):
+        created = api.create_book(title=unique("Dune"), author="Frank Herbert", year=1965)
+    
+        assert created.status_code == 201
+        book = created.json()
+        fetched = api.get_book(book["id"])
+        assert fetched.status_code == 200
+&gt;       assert fetched.json() == book
+E       AssertionError: assert {'id': 1, 'ti...lished': 1965} == {'id': 1, 'ti... 'year': 1965}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'published': 1965}
+E         Right contains 1 more item:
+E         {'year': 1965}
+E         Use -v to get more diff
+
+tests\api\test_books_api.py:17: AssertionError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.799" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.820" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.794" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="1.602" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="6.030"><failure message="AssertionError: Locator expected to contain text '1965'&#10;Actual value: &#10;      Dune-7d9786a3&#10;      Frank Herbert&#10;      &#10;      &#10;        &#10;          Delete&#10;        &#10;      &#10;     &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; get_by_test_id(&quot;book-row&quot;).filter(has_text=&quot;Dune-7d9786a3&quot;) with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;book-row&quot;).filter(has_text=&quot;Dune-7d9786a3&quot;)&#10;    14 × locator resolved to &lt;tr data-book-id=&quot;1&quot; data-testid=&quot;book-row&quot;&gt;…&lt;/tr&gt;&#10;       - unexpected value &quot;&#10;      Dune-7d9786a3&#10;[+16 more lines; full report in element text]">logged_in_page = &lt;Page url='http://127.0.0.1:63750/books'&gt;
+
+    def test_added_book_is_listed(logged_in_page):
+        books = BooksPage(logged_in_page).open()
+        title = unique("Dune")
+    
+        books.add(title, "Frank Herbert", "1965")
+    
+        expect(books.row(title)).to_contain_text("Frank Herbert")
+&gt;       expect(books.row(title)).to_contain_text("1965")
+E       AssertionError: Locator expected to contain text '1965'
+E       Actual value: 
+E             Dune-7d9786a3
+E             Frank Herbert
+E             
+E             
+E               
+E                 Delete
+E               
+E             
+E            
+E       Call log:
+E         - Expect "to_contain_text" get_by_test_id("book-row").filter(has_text="Dune-7d9786a3") with timeout 5000ms
+E         - waiting for get_by_test_id("book-row").filter(has_text="Dune-7d9786a3")
+E           14 × locator resolved to &lt;tr data-book-id="1" data-testid="book-row"&gt;…&lt;/tr&gt;
+E              - unexpected value "
+E             Dune-7d9786a3
+E             Frank Herbert
+E             
+E             
+E               
+E                 Delete
+E               
+E             
+E           "
+E       
+E       Aria snapshot:
+E       - row "Dune-7d9786a3 Frank Herbert Delete":
+E         - cell "Dune-7d9786a3"
+E         - cell "Frank Herbert"
+E         - cell
+E         - cell "Delete":
+E           - button "Delete"
+
+tests\ui\test_books_ui.py:16: AssertionError</failure></testcase><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="1.275" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.862" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="1.390" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.261" /><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.148" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.579" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.901" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.469" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="0.410" /></testsuite></testsuites>

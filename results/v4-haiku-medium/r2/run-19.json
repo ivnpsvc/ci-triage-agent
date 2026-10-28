@@ -1,0 +1,184 @@
+{
+  "run_id": "run-19",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.004,
+  "usage": {
+    "input": 10,
+    "output": 3912,
+    "cache_read": 24203,
+    "cache_write": 14746
+  },
+  "report": {
+    "summary": "Two separate root causes. The main one is a product bug: book_dict in app/main.py:144 returns the key 'published' instead of 'year', so GET responses don't match create responses and the UI year column is blank; this breaks three tests. The other is a test bug: test_current_year_is_accepted posts THIS_YEAR+1, which the app correctly rejects, so fix the app's key first and then correct that test to use THIS_YEAR.",
+    "causes": [
+      {
+        "cause_id": "book-dict-year-key-published",
+        "category": "product_bug",
+        "title": "GET/list book responses return 'published' instead of 'year', so the year is lost in the API and UI",
+        "explanation": "book_dict() builds the response dict with the key 'published' (app/main.py:144), but every other book payload uses 'year': insert_book returns {'id', **book.model_dump()} with a 'year' key (app/main.py:160), and update returns 'year' too (app/main.py:218). So POST returns 'year' while GET /api/books/{id} returns 'published' for the same book, and the value is the same. test_created_book_can_be_fetched compares a GET result to the POST result and fails on this key mismatch. test_book_can_be_updated expects the GET to return 'year' and fails the same way. In the UI, books.html:19 renders b.year, but book_dict no longer has a 'year' key, so the Year cell is empty and test_added_book_is_listed cannot find '1965' in the row (the aria snapshot shows the row with no year cell text). This is one defect with three symptoms. It is deterministic, not timing-related.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:26: AssertionError (left dict contains {'published': 2001}, right expects {'year': 2001})",
+          "tests\\api\\test_books_api.py:17: AssertionError (fetched.json() == book; left contains {'published': 1965}, right contains {'year': 1965})",
+          "app/main.py:144: return {\"id\": row[\"id\"], \"title\": row[\"title\"], \"author\": row[\"author\"], \"published\": row[\"year\"]}",
+          "app/main.py:160: return {\"id\": cur.lastrowid, **book.model_dump()}  (uses 'year')",
+          "app/templates/books.html:19: <td>{{ b.year or \"\" }}</td>",
+          "UI failure: Expect to_contain_text '1965' on book-row; Actual value shows 'Dune-7d9786a3 / Frank Herbert / Delete' with no year; aria snapshot has no year cell text"
+        ],
+        "suggested_fix": "Change book_dict in app/main.py:144 to use the key 'year' (\"year\": row[\"year\"]) so the GET, list and create responses share one schema. Check any client code or other tests that read 'published' and update them too. The UI test should then pass without changes.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      },
+      {
+        "cause_id": "current-year-test-uses-next-year",
+        "category": "test_bug",
+        "title": "test_current_year_is_accepted submits next year, which the app is designed to reject",
+        "explanation": "The test is named 'current year is accepted' but calls create_book with year=THIS_YEAR + 1 (tests/api/test_books_api.py:48). The app's validation allows only 1..date.today().year (app/main.py:81-84), so it returns 422 for next year. The rest of the suite agrees with the app: test_invalid_book_is_rejected has a 'next-year' case expecting 422 (tests/api/test_books_api.py:58), and test_future_year_shows_error_and_keeps_input expects the same rejection. The application is right and this test asserts the wrong value. The failure is deterministic in the sense that it fails every run; it only depends on the date in the sense that THIS_YEAR is computed at import time.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:50: assert 422 == 201 (response.status_code)",
+          "tests/api/test_books_api.py:48: response = api.create_book(title=unique(\"New\"), author=\"Someone\", year=THIS_YEAR + 1)",
+          "app/main.py:83-84: if not 1 <= book.year <= this_year: raise HTTPException(422, f\"Year must be between 1 and {this_year}\")",
+          "tests/api/test_books_api.py:58: ({\"title\": \"T\", \"author\": \"A\", \"year\": THIS_YEAR + 1}, \"Year must be between\"),"
+        ],
+        "suggested_fix": "Change the test to submit year=THIS_YEAR so it tests the boundary the name describes, and keep the next-year rejection covered by test_invalid_book_is_rejected. Alternatively, if the team wants next-year books accepted, change validate_book, but that would break the invalid-book and UI future-year tests, so the test change is the more likely fix.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_current_year_is_accepted"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_book_can_be_updated"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_current_year_is_accepted"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_created_book_can_be_fetched"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/data.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 313,
+        "end_line": 400
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    }
+  ]
+}

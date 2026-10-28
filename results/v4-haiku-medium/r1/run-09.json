@@ -1,0 +1,119 @@
+{
+  "run_id": "run-09",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 3,
+  "cost_usd": 0.0029,
+  "usage": {
+    "input": 8,
+    "output": 2358,
+    "cache_read": 6980,
+    "cache_write": 13358
+  },
+  "report": {
+    "summary": "All three failures share one root cause, a product bug: book_dict() in app/main.py:144 returns the year under the key \"published\", but the API tests, the create/update responses, and the books.html template all expect \"year\". Fix book_dict to emit \"year\" (or align the contract in one place), then rerun; the UI test should pass once the year value is available to the template.",
+    "causes": [
+      {
+        "cause_id": "book-dict-published-key-instead-of-year",
+        "category": "product_bug",
+        "title": "GET and list responses return the year as \"published\" instead of \"year\"",
+        "explanation": "book_dict() builds the book dict with the key \"published\" (app/main.py:144). Create and update responses use BookIn.model_dump(), which has the key \"year\" (app/main.py:160 and 218). So POST /api/books returns {\"year\": 1965} while GET /api/books/{id} returns {\"published\": 1965}, and the same book looks different depending on the endpoint. The two API tests assert the \"year\" shape, which matches the create/update responses and the test's intent, so the tests are correct and the app is wrong. The UI failure has the same cause: the books.html template reads b.year (books.html:19), but list_books() goes through book_dict(), so b.year is undefined and the Year cell renders empty. The row therefore contains no '1965' and the to_contain_text assertion times out. This is deterministic, not timing-related.",
+        "evidence": [
+          "tests\\api\\test_books_api.py:17: assert fetched.json() == book  \u2014  Left contains 1 more item: {'published': 1965}; Right contains 1 more item: {'year': 1965}",
+          "tests\\api\\test_books_api.py:26: assert api.get_book(book[\"id\"]).json() == {\"id\": ..., \"year\": 2001}  \u2014  Left contains 1 more item: {'published': 2001}",
+          "app/main.py:144: def book_dict(row): return {\"id\": row[\"id\"], \"title\": row[\"title\"], \"author\": row[\"author\"], \"published\": row[\"year\"]}",
+          "app/main.py:160: return {\"id\": cur.lastrowid, **book.model_dump()}  (model_dump yields key \"year\")",
+          "app/templates/books.html:19: <td>{{ b.year or \"\" }}</td>",
+          "tests/ui/test_books_ui.py:16: expect(books.row(title)).to_contain_text(\"1965\")  \u2014  Actual value shows title, author, and an empty year cell; Expect timed out after 5000ms"
+        ],
+        "suggested_fix": "In app/main.py book_dict(), change the key \"published\" to \"year\" so GET, list, and create/update responses share one shape. Check that no client or other test depends on \"published\" (search for it first). Add an API test that asserts the list and get responses match the create response shape, so the mismatch cannot return unnoticed.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_created_book_can_be_fetched"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_book_can_be_updated"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    }
+  ]
+}

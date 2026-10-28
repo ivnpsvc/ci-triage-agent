@@ -1,0 +1,23 @@
+{
+  "run_id": "run-06",
+  "model": "baseline",
+  "turns": 0,
+  "cost_usd": 0,
+  "report": {
+    "summary": "Rule-based baseline.",
+    "causes": [
+      {
+        "cause_id": "cause-1",
+        "category": "product_bug",
+        "title": "AssertionError: assert {'id': 1, 'ti... 'year': 2001} == {'id': 1, 'ti... 'year': 2002}",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_book_can_be_updated"
+        ]
+      }
+    ]
+  }
+}

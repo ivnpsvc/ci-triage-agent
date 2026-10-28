@@ -146,6 +146,34 @@ one search, one read of `validate_book`) and needs fewer than half the tool call
 price per token is 20x Haiku's, but because it reads less, a pass costs 11x. The dataset
 is too easy to separate the models; harder faults are needed for that.
 
+### Dataset v4: misleading errors
+
+v4 keeps v3's faults and adds four where the error text points away from the cause:
+19 runs, 103 failed tests.
+
+| Run | What broke | The trap |
+|---|---|---|
+| run-09 | product bug: API returns the year as `published` | API dict mismatches and a UI timeout are one cause |
+| run-10 | product bug: missing comma in the schema SQL | the app can't start and all 26 tests error, exactly like the database outage |
+| run-11, 15, 16 | flaky: book list sometimes served from a stale copy | a just added or deleted book doesn't show, which reads as a product bug |
+| run-12 | test bug: user fixture passes login arguments in the wrong order | 19 tests error with `KeyError: 'token'`, which reads as a login bug |
+| run-19 | the renamed field plus a broken test in the same file | a product bug and a test bug side by side |
+
+| Triage on dataset v4 | Pass 1 | Pass 2 | Pass 3 | Same category every pass | Cost (3 passes) |
+|---|---|---|---|---|---|
+| Baseline (rules) | 2/19 | | | | $0 |
+| Agent v4, Haiku 5.5 | **19/19** | **19/19** | **19/19** | **100%** | $0.157 |
+
+The baseline falls into every trap (schema typo and swapped arguments as
+infrastructure, stale list as product bug; 41% category accuracy). The agent gets every
+run right, and the traces show how: it quotes the line without the comma after
+`owner_id INTEGER NOT NULL`, compares `login(creds["password"], creds["username"])`
+with `def login(self, username, password)`, and finds the `random.random()` check in
+front of the cached list. No trace mentions a fault name.
+
+Sonnet wasn't rerun on v4: Haiku already scores 100% there, so a stronger model
+could only cost more.
+
 ## How it works
 
 `triage/agent.py` is a hand-written tool-use loop on the Anthropic Messages API:
@@ -187,7 +215,10 @@ Use `--model claude-opus-5-5 --effort high` to compare with the strongest model.
 
 ## Known limitations
 
-- Twelve runs and eight faults is still a small dataset, and every fault is a
-  one-line edit. Harder cases to add: bugs spread over several files, failures with
-  misleading error messages, and real-world flaky patterns (test order, shared state).
+- The app is small (one 350-line module), so the agent can read all of it on every
+  run, and every fault is a small edit. A larger codebase, bugs spread over several
+  files and order-dependent flakiness would test whether it still finds the cause
+  when it can't read everything.
+- The faults were written by the same person as the agent's prompt. Real CI failures
+  from an unrelated project would be a fairer test.
 - Sonnet was run once; Haiku's consistency (three passes) isn't measured for it.

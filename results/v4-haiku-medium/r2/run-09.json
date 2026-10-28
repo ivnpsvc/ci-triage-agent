@@ -1,0 +1,144 @@
+{
+  "run_id": "run-09",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.003,
+  "usage": {
+    "input": 10,
+    "output": 2485,
+    "cache_read": 18351,
+    "cache_write": 12392
+  },
+  "report": {
+    "summary": "All three failures come from one product bug: `book_dict` in app/main.py:144 returns the year under the key `published`, while the POST response, the PUT response, and the books.html template all use `year`. Fix this first, by making `book_dict` return `year` (or updating every consumer to `published`, but `year` matches the rest of the app and the tests). The fix should clear all three failures with no test changes.",
+    "causes": [
+      {
+        "cause_id": "book-dict-year-key-mismatch",
+        "category": "product_bug",
+        "title": "GET /api/books/{id}, the book list, and the UI report the year under `published` instead of `year`",
+        "explanation": "book_dict() renames the year column to `published`. Create (insert_book) and update (api_update_book) return the BookIn model dump, which uses `year`. So a created or updated book has a different shape when read back. Both API tests compare the GET body against the create/update body and fail on exactly this key. The UI also uses list_books() through book_dict, and books.html:19 renders `b.year`. That key does not exist in the dict, so Jinja renders it empty, and the year cell is blank. This is deterministic, not timing-related. The app's own API is inconsistent, so the test expectations are reasonable and the application is wrong.",
+        "evidence": [
+          "app/main.py:144: `return {\"id\": row[\"id\"], \"title\": row[\"title\"], \"author\": row[\"author\"], \"published\": row[\"year\"]}`",
+          "app/main.py:160: insert_book returns `{\"id\": cur.lastrowid, **book.model_dump()}`, which has `year`",
+          "app/main.py:218: api_update_book returns `{\"id\": book_id, **book.model_dump()}`, which has `year`",
+          "app/templates/books.html:19: `<td>{{ b.year or \"\" }}</td>`, which reads a key that book_dict never sets",
+          "tests/api/test_books_api.py:17: `assert fetched.json() == book` fails with 'Left contains 1 more item: {'published': 1965}' vs 'Right contains 1 more item: {'year': 1965}'",
+          "tests/api/test_books_api.py:26-28: expects GET to return `\"year\": 2001`; actual is `published: 2001`",
+          "tests/ui/test_books_ui.py:16: `expect(books.row(title)).to_contain_text(\"1965\")` fails; the actual row text is 'Dune-a4f89e68 / Frank Herbert / Delete' with no year"
+        ],
+        "suggested_fix": "In app/main.py book_dict(), change the key `published` to `year` so reads match create/update responses and the template. Then check that nothing else depends on `published` (grep the repo, including the frontend and any API clients). Rerun the three tests.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "list_failures",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_created_book_can_be_fetched"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_books_api::test_book_can_be_updated"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/api/test_books_api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/data.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 345
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/api.py"
+      },
+      "is_error": false
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "run_id": "run-12",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0019,
+  "usage": {
+    "input": 10,
+    "output": 2193,
+    "cache_read": 20130,
+    "cache_write": 4813
+  },
+  "report": {
+    "summary": "All 19 errors come from one fixture: the `new_user` factory in tests/conftest.py calls `anon.login` with its arguments swapped, so the login is rejected with a 401 and the `['token']` lookup fails before any test body runs. Fix the argument order in conftest.py:86 first; the app is behaving correctly and no product change is needed.",
+    "causes": [
+      {
+        "cause_id": "swapped-login-args-in-new-user-fixture",
+        "category": "test_bug",
+        "title": "new_user fixture passes password and username to login() in the wrong order",
+        "explanation": "BookshelfApi.login is defined as login(self, username, password) and posts {\"username\": username, \"password\": password}. The new_user fixture calls anon.login(creds[\"password\"], creds[\"username\"]), so the server receives the password as the username and the username as the password. start_session then finds no matching user or hash mismatch and returns None, and the app answers 401 \"Invalid username or password\". The fixture never checks the status code of the login call, so the response body has no 'token' key and indexing it raises KeyError: 'token' during setup. Every test that requests the user or new_user fixture (directly or through the user fixture) therefore errors in setup. The other call sites in the suite pass arguments in the correct order, which points to a typo in this one fixture rather than an app regression.",
+        "evidence": [
+          "tests/conftest.py:86: token = anon.login(creds[\"password\"], creds[\"username\"]).json()[\"token\"]",
+          "tests/support/api.py:21-22: def login(self, username: str, password: str) -> httpx.Response: return self.http.post(\"/api/login\", json={\"username\": username, \"password\": password})",
+          "tests/api/test_auth_api.py:33: response = anon_api.login(user[\"username\"], user[\"password\"])",
+          "app/main.py:188-190: token = start_session(creds.username, creds.password); if token is None: raise HTTPException(401, \"Invalid username or password\")",
+          "Traceback for test_login_returns_token: tests\\conftest.py:86: token = anon.login(creds[\"password\"], creds[\"username\"]).json()[\"token\"] / E KeyError: 'token'"
+        ],
+        "suggested_fix": "In tests/conftest.py line 86, change to anon.login(creds[\"username\"], creds[\"password\"]). Optionally call .raise_for_status() on the login response, as the register call on line 85 already does, so any future login failure reports the HTTP status instead of a KeyError.",
+        "confidence": "high",
+        "tests": [
+          "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected",
+          "tests.api.test_auth_api::test_login_returns_token",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_auth_api::test_duplicate_username_is_rejected",
+          "tests.api.test_books_api::test_current_year_is_accepted",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.api.test_books_api::test_deleted_book_is_gone",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]",
+          "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]",
+          "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]",
+          "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_auth_api::test_login_returns_token"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "search_code",
+      "input": {
+        "pattern": "token"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/api.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 85,
+        "end_line": 195
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py",
+        "start_line": 75,
+        "end_line": 90
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "\\.login\\(|/api/login"
+      },
+      "is_error": false
+    }
+  ]
+}

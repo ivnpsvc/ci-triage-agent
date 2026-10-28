@@ -1,0 +1,133 @@
+{
+  "run_id": "run-11",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 7,
+  "cost_usd": 0.0034,
+  "usage": {
+    "input": 16,
+    "output": 3391,
+    "cache_read": 39100,
+    "cache_write": 10267
+  },
+  "report": {
+    "summary": "The one failure, test_deleted_book_disappears[chromium], is a flaky failure caused by the app, not the test. GET /books serves a per-user list cache in app/main.py that is never invalidated on delete, and it is returned at random (70% of the time), so the deleted row sometimes still renders. Fix the cache in app/main.py first (invalidate on insert/delete, or drop the random shortcut); the test itself is correct.",
+    "causes": [
+      {
+        "cause_id": "stale-book-list-cache",
+        "category": "flaky",
+        "title": "Book list cache is served stale at random after a delete",
+        "explanation": "app/main.py keeps a module-level _recent_lists dict and list_books() returns the cached list with probability 0.7 whenever the user already has an entry. Nothing clears that cache when a book is inserted or deleted: books_delete (app/main.py:343-350) only runs DELETE FROM books, and insert_book (app/main.py:160-167) does not touch the cache. After the test deletes the book, the redirect to /books re-renders from the stale cache about 70% of the time, so the deleted row stays in the DOM. The test waits 5 s and sees count 1 for the whole window, because the page is rendered once and is not re-fetched. Whether the test passes therefore depends on chance, so the same commit can pass on a rerun. The app is still wrong in the failing case, because a delete should always be visible. The randomness is the app's, so this is classed as flaky with the root cause in the app. Other tests that list books (for example the API test_books_api.py:41) can be affected in the same way.",
+        "evidence": [
+          "Failure: \"Expect \\\"to_have_count\\\" get_by_test_id(\\\"book-row\\\").filter(has_text=\\\"Delete me-6876d9f8\\\")\" / \"14 \u00d7 locator resolved to 1 element\" / \"unexpected value \\\"1\\\"\"",
+          "app/main.py:148: _recent_lists: dict[int, list[dict]] = {}",
+          "app/main.py:152-153: \"if user_id in _recent_lists and random.random() < 0.7:\\n        return _recent_lists[user_id]\"",
+          "app/main.py:156-157: the cache is only written here, in list_books; no invalidation exists anywhere in app/main.py (grep for _recent_lists finds only lines 148, 152, 156, 157)",
+          "app/main.py:260: \"books\": list_books(user[\"id\"]),  (render_books used by GET /books)",
+          "app/main.py:343-350: books_delete runs \"DELETE FROM books WHERE id = ?\" and redirects, with no cache invalidation",
+          "tests/ui/test_books_ui.py:33-35: books.delete(title) then expect(books.row(title)).to_have_count(0)",
+          "tests/support/pages.py:37-38 and 46-47: row() filters book-row by title; delete() clicks the delete-book button in that row"
+        ],
+        "suggested_fix": "In app/main.py, remove the random shortcut in list_books (always query the DB), or at minimum clear _recent_lists[user_id] in insert_book and books_delete (and the API delete route at app/main.py:228-232). Better still, drop the cache entirely unless there is a measured need for it. Then add a regression test that deletes a book and reloads /books several times to confirm it stays gone. No change to the test is needed.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "search_code",
+      "input": {
+        "pattern": "delete|DELETE|book-row"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 300,
+        "end_line": 370
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "search_code",
+      "input": {
+        "pattern": "def get_own_book|def page_user|def api_user|def insert_book|def unique|def db\\(|sqlite|isolation|timeout"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 5,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 40,
+        "end_line": 180
+      },
+      "is_error": false
+    },
+    {
+      "turn": 5,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 5,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 6,
+      "tool": "search_code",
+      "input": {
+        "pattern": "list_books|_recent_lists|def render_books|random"
+      },
+      "is_error": false
+    }
+  ]
+}

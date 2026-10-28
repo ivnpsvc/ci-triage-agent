@@ -1,0 +1,97 @@
+{
+  "run_id": "run-15",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0026,
+  "usage": {
+    "input": 12,
+    "output": 2064,
+    "cache_read": 21195,
+    "cache_write": 11139
+  },
+  "report": {
+    "summary": "The one failure, test_added_book_is_listed, is a flaky test caused by the app's book-list cache in app/main.py. list_books() returns a cached list 70% of the time and is never invalidated on insert, so the page can render the stale pre-insert list ('No books yet.') right after a book is added. Fix the app first by invalidating or removing the cache on every write, then rerun the test to confirm it passes consistently.",
+    "causes": [
+      {
+        "cause_id": "stale-book-list-cache",
+        "category": "flaky",
+        "title": "Book list served from a random, never-invalidated cache after insert",
+        "explanation": "list_books() in app/main.py returns the cached _recent_lists[user_id] with probability 0.7 whenever the user already has an entry, and insert_book() never clears that entry. The add form POSTs to /books, which redirects to GET /books; render_books() then calls list_books(), which can return the list from before the insert. The test user had no books before adding, so the stale list is empty and the page shows the empty state, which is what the aria snapshot shows. The outcome depends on chance (about 30% of renders are fresh), so the same code can pass on a rerun. The underlying defect is in the app (the cache is not invalidated on writes and is randomly bypassed), but the failure is intermittent, so it is classed as flaky rather than a consistent product_bug. The test's logic is correct: after adding a book, the row should be listed.",
+        "evidence": [
+          "tests/ui/test_books_ui.py:15: expect(books.row(title)).to_contain_text(\"Frank Herbert\") fails with 'Actual value: None / element(s) not found'",
+          "Aria snapshot in the failure shows: paragraph: No books yet. and no book-row, while the test had just added 'Dune-703ef518'",
+          "app/main.py:148-157: _recent_lists cache; list_books() returns cached data when 'user_id in _recent_lists and random.random() < 0.7'",
+          "app/main.py:160-167: insert_book() performs the INSERT but does not update or clear _recent_lists",
+          "app/main.py:321-340: books_add() redirects to /books after insert, and the GET handler render_books() calls list_books(user['id'])",
+          "app/templates/books.html:30: <p data-testid=\"empty-state\">No books yet.</p> is rendered when the list is empty"
+        ],
+        "suggested_fix": "In app/main.py, remove the random cache bypass in list_books() or make it deterministic, and invalidate the entry in insert_book(), update/delete handlers, and any other write path (for example by calling _recent_lists.pop(user_id, None) after each write). Better still, drop the cache and query the DB directly, since the DB is cheap here. Then rerun tests/ui/test_books_ui.py::test_added_book_is_listed several times to confirm it passes every time. Test-side changes are not needed.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "search_code",
+      "input": {
+        "pattern": "book-row|No books yet|add_book|def create_book|/api/books"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 380
+      },
+      "is_error": false
+    }
+  ]
+}

@@ -25,6 +25,6 @@ jobs:
 
       - name: Score the saved reports
         run: |
-          python -m triage baseline --dataset datasets/v3 --out results/v3-baseline
-          python -m triage score --dataset datasets/v3 --predictions results/v3-baseline
-          python -m triage score --dataset datasets/v3 --predictions results/v3-haiku-medium-checked
+          python -m triage baseline --dataset datasets/v4 --out results/v4-baseline
+          python -m triage score --dataset datasets/v4 --predictions results/v4-baseline
+          python -m triage score --dataset datasets/v4 --predictions results/v4-haiku-medium

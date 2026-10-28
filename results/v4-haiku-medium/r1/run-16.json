@@ -1,0 +1,102 @@
+{
+  "run_id": "run-16",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 5,
+  "cost_usd": 0.0025,
+  "usage": {
+    "input": 12,
+    "output": 2185,
+    "cache_read": 23310,
+    "cache_write": 9132
+  },
+  "report": {
+    "summary": "The one failure, test_added_book_is_listed[chromium], is flaky rather than a test bug. The app's list_books() serves a cached list 70% of the time and insert_book() never invalidates that cache, so the newly added book is often missing from the page after the redirect. First fix the app: invalidate or bypass _recent_lists on add, and remove the random cache path (or make it deterministic) before rerunning.",
+    "causes": [
+      {
+        "cause_id": "stale-book-list-cache",
+        "category": "flaky",
+        "title": "list_books() randomly returns a stale cached list that omits newly added books",
+        "explanation": "list_books() in app/main.py returns the cached _recent_lists[user_id] with probability 0.7 and only queries the database otherwise. insert_book() and books_add() never update or clear that cache. The test adds a book, follows the 303 redirect to /books, and renders the list from list_books(). When the cache is hit, the page shows the old list, so the new row never appears. The aria snapshot shows 'No books yet.' with no book rows, which matches a stale empty list for this fresh user. Whether the test passes therefore depends on random.random(), so the same commit can pass on a rerun. The defect is the missing invalidation combined with the random cache bypass in the application. The test's logic (add, then assert the row contains the author) is correct and the app should show the book every time.",
+        "evidence": [
+          "app/main.py:148-157: _recent_lists cache and 'if user_id in _recent_lists and random.random() < 0.7: return _recent_lists[user_id]'",
+          "app/main.py:160-167: insert_book() performs the INSERT and does not touch _recent_lists",
+          "app/main.py:336-340: books_add() redirects to /books after insert_book(), so the page re-renders from list_books()",
+          "Failure aria snapshot: 'paragraph: No books yet.' with no book-row present, while the test waits for get_by_test_id(\"book-row\").filter(has_text=\"Dune-640ffbd6\") for 5000ms",
+          "tests/ui/test_books_ui.py:13-15: add(title, 'Frank Herbert', '1965') then expect(books.row(title)).to_contain_text('Frank Herbert')"
+        ],
+        "suggested_fix": "In the application: have insert_book(), update_book() and delete handlers invalidate _recent_lists[user_id] (or drop the cache entirely), and remove the random.random() short-circuit in list_books(). This is the real defect, and fixing it also makes the test deterministic. In the test suite, no change is needed for this test. Rerun the test several times after the fix to confirm it is stable.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/conftest.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 4,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 400
+      },
+      "is_error": false
+    }
+  ]
+}

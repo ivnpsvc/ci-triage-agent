@@ -1,0 +1,104 @@
+{
+  "run_id": "run-11",
+  "model": "claude-haiku-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0027,
+  "usage": {
+    "input": 10,
+    "output": 2429,
+    "cache_read": 15075,
+    "cache_write": 11020
+  },
+  "report": {
+    "summary": "The one failing test, test_deleted_book_disappears[chromium], fails because the books list is served from an in-memory cache that is never invalidated on delete. app/main.py:152 returns the cached list with probability 0.7, so the deleted row is sometimes still rendered. Fix the app first by invalidating `_recent_lists` on add, update and delete, and remove the random cache hit so the outcome is deterministic.",
+    "causes": [
+      {
+        "cause_id": "stale-book-list-cache",
+        "category": "flaky",
+        "title": "Books list randomly served from a stale cache after delete",
+        "explanation": "list_books() in app/main.py:151-157 returns the cached per-user list whenever the user is in _recent_lists and random.random() < 0.7. Nothing clears that cache when a book is deleted (books_delete at app/main.py:343-350 runs a plain DELETE and never touches _recent_lists) or when one is added. So after the delete redirect, the page is re-rendered from the stale list about 70% of the time and the deleted row still appears. About 30% of the time the DB is re-read and the test passes, so the result depends on chance. The app's stale-data defect is the underlying bug; the nondeterminism is what makes this test flaky rather than consistently failing. The Playwright log matches this: '14 \u00d7 locator resolved to 1 element', which is one DOM snapshot re-checked, since polling does not re-request the page.",
+        "evidence": [
+          "tests\\ui\\test_books_ui.py:35: expect(books.row(title)).to_have_count(0)",
+          "Actual value: 1 / 14 \u00d7 locator resolved to 1 element / unexpected value \"1\"",
+          "app/main.py:152: if user_id in _recent_lists and random.random() < 0.7:",
+          "app/main.py:153: return _recent_lists[user_id]",
+          "app/main.py:156: _recent_lists[user_id] = [book_dict(r) for r in rows]",
+          "app/main.py:343-349: books_delete runs DELETE FROM books without clearing _recent_lists",
+          "app/main.py:9: import random (the only use of randomness in the app)"
+        ],
+        "suggested_fix": "In the app: remove the random.random() short-circuit in list_books so it always reads the DB, or drop the _recent_lists cache entirely. If a cache is wanted, invalidate _recent_lists[user_id] in insert_book, api_update_book, api_delete_book and books_delete. In the test suite, nothing needs changing; this test is correct. Re-run the test several times after the fix to confirm it passes consistently.",
+        "confidence": "high",
+        "tests": [
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/ui/test_books_ui.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/support/pages.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/templates/books.html"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "start_line": 314,
+        "end_line": 360
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "search_code",
+      "input": {
+        "pattern": "_recent_lists|random"
+      },
+      "is_error": false
+    }
+  ]
+}

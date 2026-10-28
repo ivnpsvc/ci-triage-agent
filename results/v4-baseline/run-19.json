@@ -1,0 +1,59 @@
+{
+  "run_id": "run-19",
+  "model": "baseline",
+  "turns": 0,
+  "cost_usd": 0,
+  "report": {
+    "summary": "Rule-based baseline.",
+    "causes": [
+      {
+        "cause_id": "cause-1",
+        "category": "product_bug",
+        "title": "AssertionError: assert {'id': 1, 'ti...lished': 2001} == {'id': 1, 'ti... 'year': 2001}",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_book_can_be_updated"
+        ]
+      },
+      {
+        "cause_id": "cause-2",
+        "category": "product_bug",
+        "title": "assert 422 == 201",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_current_year_is_accepted"
+        ]
+      },
+      {
+        "cause_id": "cause-3",
+        "category": "product_bug",
+        "title": "AssertionError: assert {'id': 1, 'ti...lished': 1965} == {'id': 1, 'ti... 'year': 1965}",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.api.test_books_api::test_created_book_can_be_fetched"
+        ]
+      },
+      {
+        "cause_id": "cause-4",
+        "category": "product_bug",
+        "title": "AssertionError: Locator expected to contain text '1965'",
+        "explanation": "",
+        "evidence": [],
+        "suggested_fix": "",
+        "confidence": "low",
+        "tests": [
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]"
+        ]
+      }
+    ]
+  }
+}

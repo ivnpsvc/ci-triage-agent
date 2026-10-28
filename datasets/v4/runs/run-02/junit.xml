@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="26" time="6.433" timestamp="2026-10-29T00:18:39.409761+01:00" hostname="ivanposavec"><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[password-too-short]" time="0.992" /><testcase classname="tests.api.test_auth_api" name="test_register_returns_created_user" time="1.069" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-short]" time="1.039" /><testcase classname="tests.api.test_auth_api" name="test_invalid_registration_is_rejected[username-too-long]" time="0.381" /><testcase classname="tests.api.test_auth_api" name="test_login_with_wrong_password_is_rejected" time="1.466" /><testcase classname="tests.api.test_auth_api" name="test_login_returns_token" time="0.844" /><testcase classname="tests.api.test_auth_api" name="test_books_require_a_token" time="0.382" /><testcase classname="tests.api.test_auth_api" name="test_duplicate_username_is_rejected" time="0.839" /><testcase classname="tests.api.test_books_api" name="test_book_can_be_updated" time="0.829" /><testcase classname="tests.api.test_books_api" name="test_created_book_can_be_fetched" time="0.786" /><testcase classname="tests.api.test_books_api" name="test_current_year_is_accepted" time="0.811" /><testcase classname="tests.api.test_books_api" name="test_deleted_book_is_gone" time="0.782" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[blank-title]" time="0.781"><failure message="assert 201 == 422&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">api = &lt;tests.support.api.BookshelfApi object at 0x000001691C66E210&gt;
+book = {'title': '   ', 'author': 'A'}, message = 'Title must not be blank'
+
+    @pytest.mark.parametrize(
+        "book, message",
+        [
+            ({"title": "   ", "author": "A"}, "Title must not be blank"),
+            ({"title": "T", "author": ""}, "Author must not be blank"),
+            ({"title": "T", "author": "A", "year": THIS_YEAR + 1}, "Year must be between"),
+            ({"title": "T", "author": "A", "year": 0}, "Year must be between"),
+        ],
+        ids=["blank-title", "empty-author", "next-year", "year-zero"],
+    )
+    def test_invalid_book_is_rejected(api, book, message):
+        response = api.create_book(**book)
+    
+&gt;       assert response.status_code == 422
+E       assert 201 == 422
+E        +  where 201 = &lt;Response [201 Created]&gt;.status_code
+
+tests\api\test_books_api.py:66: AssertionError</failure></testcase><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[empty-author]" time="0.781" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[next-year]" time="0.756" /><testcase classname="tests.api.test_books_api" name="test_users_cannot_see_each_others_books" time="1.426" /><testcase classname="tests.api.test_books_api" name="test_invalid_book_is_rejected[year-zero]" time="0.648" /><testcase classname="tests.ui.test_books_ui" name="test_added_book_is_listed[chromium]" time="0.971" /><testcase classname="tests.ui.test_books_ui" name="test_book_created_through_api_shows_in_ui[chromium]" time="1.213" /><testcase classname="tests.ui.test_books_ui" name="test_deleted_book_disappears[chromium]" time="1.314" /><testcase classname="tests.ui.test_login_ui" name="test_new_user_lands_on_empty_bookshelf[chromium]" time="0.274" /><testcase classname="tests.ui.test_login_ui" name="test_existing_user_can_log_in[chromium]" time="0.517" /><testcase classname="tests.ui.test_login_ui" name="test_wrong_password_shows_error[chromium]" time="0.867" /><testcase classname="tests.ui.test_books_ui" name="test_future_year_shows_error_and_keeps_input[chromium]" time="0.604" /><testcase classname="tests.ui.test_login_ui" name="test_books_page_requires_login[chromium]" time="0.140" /><testcase classname="tests.ui.test_login_ui" name="test_log_out_ends_the_session[chromium]" time="0.474" /></testsuite></testsuites>
