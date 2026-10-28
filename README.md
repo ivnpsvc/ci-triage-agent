@@ -133,6 +133,19 @@ every failed test is in exactly one cause; if not, it sends the report back with
 what's missing (at most twice). Over 36 runs the check fired once and the retry
 fixed it.
 
+### Haiku vs Sonnet on dataset v3
+
+| Agent v4, one pass, medium effort | Runs fully correct | Category accuracy | Tool calls | Model turns | Cost |
+|---|---|---|---|---|---|
+| Claude Haiku 5.5 | 12/12 | 100% | 122 | 48 | $0.034 |
+| Claude Sonnet 5.5 | 12/12 | 100% | 52 | 38 | $0.369 |
+
+Both models solve every run, so on these faults Sonnet buys nothing but speed of
+investigation: it goes straight to the relevant code (for the blank title: one failure,
+one search, one read of `validate_book`) and needs fewer than half the tool calls. Its
+price per token is 20x Haiku's, but because it reads less, a pass costs 11x. The dataset
+is too easy to separate the models; harder faults are needed for that.
+
 ## How it works
 
 `triage/agent.py` is a hand-written tool-use loop on the Anthropic Messages API:
@@ -177,5 +190,4 @@ Use `--model claude-opus-5-5 --effort high` to compare with the strongest model.
 - Twelve runs and eight faults is still a small dataset, and every fault is a
   one-line edit. Harder cases to add: bugs spread over several files, failures with
   misleading error messages, and real-world flaky patterns (test order, shared state).
-- Results are for one model at one effort level. Next: the same dataset on
-  `claude-opus-5-5` to see what the extra cost buys, if anything.
+- Sonnet was run once; Haiku's consistency (three passes) isn't measured for it.

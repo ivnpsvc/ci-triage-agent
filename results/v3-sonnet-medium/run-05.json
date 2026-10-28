@@ -1,0 +1,94 @@
+{
+  "run_id": "run-05",
+  "model": "claude-sonnet-5-5",
+  "effort": "medium",
+  "turns": 4,
+  "cost_usd": 0.0405,
+  "usage": {
+    "input": 10,
+    "output": 1816,
+    "cache_read": 16523,
+    "cache_write": 7602
+  },
+  "report": {
+    "summary": "All 26 tests errored in session setup. The `base_url` fixture starts the app with uvicorn, and the app process exited with code 1 before it served any request. No test logic ran, so the failures say nothing about application behavior. First, get the app's startup stderr, which the CI report doesn't include, and reproduce with `python -m uvicorn app.main:app`.",
+    "causes": [
+      {
+        "cause_id": "app-fails-to-start",
+        "category": "infrastructure",
+        "title": "App subprocess exits with code 1 during session fixture setup",
+        "explanation": "The session-scoped `base_url` fixture launches uvicorn on a free port. `_wait_until_up` sees the process had already exited with code 1 and raises, so every test errors on setup. The traceback doesn't show why the app died. `app/main.py` looks fine up to line 80. At import it runs `sqlite3.connect(DB_PATH)` and `executescript(SCHEMA)`. A likely cause is the environment: a missing dependency in the venv, an unwritable or invalid `DB_PATH` (the run is on Windows, with a temp dir or `APP_DB_PATH`), or a stale environment. This is not confirmed, because the child's stderr isn't captured in the report. An app import or startup bug in commit 9c599e2 would look the same, so confidence is limited.",
+        "evidence": [
+          "tests\\conftest.py:35: RuntimeError: App exited early with code 1",
+          "tests\\conftest.py:65: _wait_until_up(url, proc) raised inside the base_url fixture",
+          "app/main.py:57-58: DB connection and schema creation run at import time",
+          "All 26 tests (API and UI) fail identically on setup, which points to a shared environment or startup problem"
+        ],
+        "suggested_fix": "Run `python -m uvicorn app.main:app` in the same environment and read the stderr. Check that dependencies from requirements.txt are installed, that the DB path is writable, and that APP_DB_PATH is unset or valid. If it is an import error in the app, fix it as a product bug. Also make the fixture capture and print the child's stderr when startup fails.",
+        "confidence": "medium",
+        "tests": [
+          "tests.api.test_auth_api::test_login_with_wrong_password_is_rejected",
+          "tests.api.test_auth_api::test_register_returns_created_user",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-short]",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[password-too-short]",
+          "tests.api.test_auth_api::test_books_require_a_token",
+          "tests.api.test_auth_api::test_invalid_registration_is_rejected[username-too-long]",
+          "tests.api.test_auth_api::test_duplicate_username_is_rejected",
+          "tests.api.test_auth_api::test_login_returns_token",
+          "tests.api.test_books_api::test_created_book_can_be_fetched",
+          "tests.api.test_books_api::test_deleted_book_is_gone",
+          "tests.api.test_books_api::test_book_can_be_updated",
+          "tests.api.test_books_api::test_users_cannot_see_each_others_books",
+          "tests.api.test_books_api::test_current_year_is_accepted",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[blank-title]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[next-year]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[empty-author]",
+          "tests.api.test_books_api::test_invalid_book_is_rejected[year-zero]",
+          "tests.ui.test_books_ui::test_book_created_through_api_shows_in_ui[chromium]",
+          "tests.ui.test_books_ui::test_added_book_is_listed[chromium]",
+          "tests.ui.test_books_ui::test_future_year_shows_error_and_keeps_input[chromium]",
+          "tests.ui.test_books_ui::test_deleted_book_disappears[chromium]",
+          "tests.ui.test_login_ui::test_existing_user_can_log_in[chromium]",
+          "tests.ui.test_login_ui::test_new_user_lands_on_empty_bookshelf[chromium]",
+          "tests.ui.test_login_ui::test_books_page_requires_login[chromium]",
+          "tests.ui.test_login_ui::test_wrong_password_shows_error[chromium]",
+          "tests.ui.test_login_ui::test_log_out_ends_the_session[chromium]"
+        ]
+      }
+    ]
+  },
+  "trace": [
+    {
+      "turn": 1,
+      "tool": "get_failure",
+      "input": {
+        "test_id": "tests.api.test_auth_api::test_login_returns_token"
+      },
+      "is_error": false
+    },
+    {
+      "turn": 1,
+      "tool": "list_files",
+      "input": {},
+      "is_error": false
+    },
+    {
+      "turn": 2,
+      "tool": "read_file",
+      "input": {
+        "path": "app/main.py",
+        "end_line": 80
+      },
+      "is_error": false
+    },
+    {
+      "turn": 3,
+      "tool": "read_file",
+      "input": {
+        "path": "tests/conftest.py",
+        "end_line": 50
+      },
+      "is_error": false
+    }
+  ]
+}
